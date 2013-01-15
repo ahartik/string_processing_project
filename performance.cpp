@@ -17,7 +17,7 @@ string random_string(int len)
     return ret;
 }
 
-const int N = 100000;
+const int N = 200000;
 const int M = 100;
 
 string text = random_string(N);
@@ -38,7 +38,7 @@ int main()
 {
     for (int j = 0; j < M; j++)
     {
-        patterns.push_back(random_string(10 + (j * N) / (M * 10)));
+        patterns.push_back(random_string(10 + (j * N) / (M * 20)));
     }
     cout << "Generated\n";
 

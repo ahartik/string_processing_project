@@ -1,6 +1,7 @@
 set (CMAKE_RUNTIME_OUTPUT_DIRECTORY "bin/")
 project (multiple_pattern_match)
-set(CMAKE_BUILD_TYPE Release)
+set(CMAKE_BUILD_TYPE None)
+set(CMAKE_CXX_FLAGS "-O2")
 set (MATCHER_SRC aho_corasick.cpp)
 add_executable(test test.cpp ${MATCHER_SRC})
 add_executable(performance performance.cpp ${MATCHER_SRC})
