@@ -1,3 +1,6 @@
 set (CMAKE_RUNTIME_OUTPUT_DIRECTORY "bin/")
 project (multiple_pattern_match)
-add_executable(test test.cpp aho_corasick.cpp)
+set(CMAKE_BUILD_TYPE Release)
+set (MATCHER_SRC aho_corasick.cpp)
+add_executable(test test.cpp ${MATCHER_SRC})
+add_executable(performance performance.cpp ${MATCHER_SRC})
