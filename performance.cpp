@@ -25,13 +25,15 @@ vector<string> patterns;
 
 void matcher_time(const multiple_matcher* m)
 {
+    cout << "=== "<<m->name()<<" ===\n";
     double t = timef();
     match_vector matches;
     m->match(text, patterns, matches);
     t = timef() - t;
-    cout << m->name()<<":\n";
+    cout<<"\n= Results =\n";
     cout << matches.size()<<" matches\n";
     cout << t << " seconds\n";
+    cout<<"------------------------------\n\n";
 }
 
 int main()
