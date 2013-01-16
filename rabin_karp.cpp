@@ -6,13 +6,13 @@
 #include<iostream>
 using namespace std;
 const uint64_t HASH_MOD=257;
-const uint64_t TABLE_SIZE=10000;
+const uint64_t TABLE_SIZE=10007;
 class rabin_karp {
     public:
     bool check_match(const string& text, const string& pattern, int text_index) 
     {
         if(text.size() -text_index < pattern.size()) return false;
-        for(int i=0;i<pattern.size();i++) 
+        for(int i=pattern.size()-1;i>=0;i--) 
             if(pattern[i] != text[text_index+i]) return false;
         return true;
     }

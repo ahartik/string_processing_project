@@ -3,6 +3,7 @@
 #include<cstdlib>
 #include<string>
 #include<iostream>
+#include "util.hpp"
 using namespace std;
 
 string random_string(int len)
@@ -36,11 +37,36 @@ void matcher_time(const multiple_matcher* m)
     cout<<"------------------------------\n\n";
 }
 
-int main()
+
+
+int main(int argc, char** argv)
 {
-    for (int j = 0; j < M; j++)
-    {
-        patterns.push_back(random_string(10 + (j * N) / (M * 20)));
+    srand(time(0));
+    if(argc==3) {
+        cout<<"Text: "<<argv[1]<<"\n";
+        cout<<"Patterns: "<<argv[2]<<"\n";
+
+        text = read_text(argv[1]).substr(0,10000000);
+        
+        vector<string> words = read_words(argv[2]);
+        words.resize(500000);
+        int i=0;
+        string current="";
+        while(i<words.size()) {
+            if(current=="") current=words[i++];
+            else if(rand()%2) {
+                patterns.push_back(current);
+                current="";
+            } else {
+                current+=" "+words[i++];
+            }
+        }
+    } else {
+
+        for (int j = 0; j < M; j++)
+        {
+            patterns.push_back(random_string(10 + (j * N) / (M * 20)));
+        }
     }
     cout << "Generated\n";
 
