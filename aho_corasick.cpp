@@ -190,6 +190,7 @@ class ac_machine
                 }
             }
         }
+        cout << "Machine ready\n";
     }
     int root()const
     {
