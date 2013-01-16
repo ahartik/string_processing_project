@@ -46,10 +46,10 @@ int main(int argc, char** argv)
         cout<<"Text: "<<argv[1]<<"\n";
         cout<<"Patterns: "<<argv[2]<<"\n";
 
-        text = read_text(argv[1]).substr(0,10000000);
+        text = read_text(argv[1]).substr(0,1000000);
         
         vector<string> words = read_words(argv[2]);
-        words.resize(500000);
+        words.resize(50000);
         int i=0;
         string current="";
         while(i<words.size()) {
