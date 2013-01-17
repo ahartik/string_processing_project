@@ -83,8 +83,6 @@ int main(int argc, char** argv)
         {
             patterns.push_back(random_string(10 + (j * N) / (M * 20)));
         }
-        patterns[0]="AAAAAAAAAA";
-        for(int i=0;i<10;i++) text[i]='A';
     }
     cout << "Generated\n";
 
