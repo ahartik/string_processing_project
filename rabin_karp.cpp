@@ -1,4 +1,5 @@
 #include"match.hpp"
+#include<iomanip>
 #include "rabin_karp.hpp"
 #include <cstdint>
 #include<cstdlib>
@@ -8,7 +9,7 @@
 #include<utility>
 using namespace std;
 const int HASH_MOD=65521;
-const int TABLE_SIZE=10007;
+const int TABLE_SIZE=200003;
 
 
 
@@ -40,8 +41,8 @@ void rabin_karp_matcher::match(
         match_vector& out) const
 {
     rabin_karp rk;
-    int hash_sizes[]={1,5,10};
-    vector<vector<int> > sect_patterns(3);
+    int hash_sizes[]={1,10};
+    vector<vector<int> > sect_patterns(2);
     for(int i=0;i<orig_patterns.size();i++) {
         bool t=false;
         for(int j=1;j<sect_patterns.size();j++) {
@@ -54,6 +55,12 @@ void rabin_karp_matcher::match(
         if(!t) sect_patterns[sect_patterns.size()-1].push_back(i);
     }
     for(int size=0;size<sect_patterns.size();size++) {
+        int mismatch=0;
+        int modmismatch=0;
+        int hashmismatch=0;
+        int suffixmismatch=0;
+        int correct=0;
+        int hashcorrect=0;
         vector<vector<pair<uint32_t,int> > > hash_table(TABLE_SIZE);
         vector<int>& patterns = sect_patterns[size];
         if(patterns.size()==0) continue;
@@ -86,18 +93,38 @@ void rabin_karp_matcher::match(
             if(i>=hash_length-1) {
                 uint32_t current_hash = (current_b << 16) | current_a;
                 vector<pair<uint32_t,int> >& plist = hash_table[current_hash%TABLE_SIZE];
+                bool found=false;
                 for(auto it = plist.begin(); it!=plist.end();it++) {
                     uint32_t hash = it->first;
-                    if(hash!=current_hash) continue;
+                    if(hash!=current_hash) {
+                        modmismatch++;
+                        continue;
+
+                    }
                     int w = it->second;
-                    
                     if(rk.check_match(text,orig_patterns[w],i-hash_length+1)) {
-                        
                         out.push_back(::match(i-hash_length+1,w));
+                        correct++;
+                    } else {
+                        bool t=true;
+                        for(int j=0;j<hash_length;j++)  {
+                            if(text[j+i-hash_length+1]!=orig_patterns[w][j]) t=false;
+                        }
+                        if(t) suffixmismatch++;
+                        else hashmismatch++;
+                        
                     }
                 }
             }
         }   
+        double total=0.01*(suffixmismatch+hashmismatch+modmismatch+correct);
+        cout.precision(1);
+        cout<<"Correct: "<<fixed<<correct/total<<"%\n";
+        cout<<"Mod mismatch: "<<fixed<<modmismatch/total<<"%\n";
+        cout<<"Hash mismatch: "<<fixed<<hashmismatch/total<<"%\n";
+        cout<<"Suffix mismatch: "<<fixed<<suffixmismatch/total<<"%\n";
+        cout<<endl;
+        cout.precision(4);
     }
 
 
