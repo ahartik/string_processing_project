@@ -2,14 +2,11 @@
 #include "rabin_karp.hpp"
 #include <cstdint>
 #include<cstdlib>
-#include "gmp.h"
-#include "gmpxx.h"
 #include<vector>
 #include<iostream>
 #include<map>
 #include<utility>
 using namespace std;
-typedef mpz_class bint;
 const int HASH_MOD=65521;
 const int TABLE_SIZE=10007;
 
@@ -36,10 +33,6 @@ class rabin_karp {
         return (hash_b<<16) | hash_a;
     }
 };
-
-int toint(mpz_class a) {
-    return mpz_get_si(a.get_mpz_t());
-}
 
 void rabin_karp_matcher::match(
         const string& text,
