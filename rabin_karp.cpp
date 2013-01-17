@@ -6,10 +6,15 @@
 #include "gmpxx.h"
 #include<vector>
 #include<iostream>
+#include<map>
+#include<utility>
 using namespace std;
 typedef mpz_class bint;
-const int HASH_MOD=257;
+const int HASH_MOD=65521;
 const int TABLE_SIZE=10007;
+
+
+
 class rabin_karp {
     public:
     bool check_match(const string& text, const string& pattern, int text_index) 
@@ -19,13 +24,16 @@ class rabin_karp {
             if(pattern[i] != text[text_index+i]) return false;
         return true;
     }
-    bint pattern_hash(const string& pattern, int hash_length) {
-        bint hash=0;
+    uint32_t pattern_hash(const string& pattern, int hash_length) {
+        uint32_t hash_a=1;
+        uint32_t hash_b=0;
         for(int i=0;i<hash_length;i++) {
-            hash=hash*HASH_MOD;
-            hash=hash+(unsigned char)pattern[i];
+            hash_a+=(unsigned char)pattern[i];
+            hash_b+=hash_a;
+            hash_a%=HASH_MOD;
+            hash_b%=HASH_MOD;
         }
-        return hash;
+        return (hash_b<<16) | hash_a;
     }
 };
 
@@ -47,43 +55,58 @@ void rabin_karp_matcher::match(
             if(orig_patterns[i].size()<hash_sizes[j]) {
                 sect_patterns[j-1].push_back(i);
                 t=true; 
-                break;
+                 break;
             }
         }
         if(!t) sect_patterns[sect_patterns.size()-1].push_back(i);
     }
     for(int size=0;size<sect_patterns.size();size++) {
-        vector<vector<int> > hash_table(TABLE_SIZE);
+        vector<vector<pair<uint32_t,int> > > hash_table(TABLE_SIZE);
         vector<int>& patterns = sect_patterns[size];
         if(patterns.size()==0) continue;
-        int hash_length=1<<20;
+        int hash_length=1<<20; 
         for(int i=0;i<patterns.size();i++) hash_length=min(hash_length,(int)orig_patterns[patterns[i]].size());
-        cout<<"Hash length: "<<hash_length<<endl;
-        for(int i=0;i<patterns.size();i++) hash_table[toint(rk.pattern_hash(orig_patterns[patterns[i]],hash_length)%TABLE_SIZE)].push_back(patterns[i]);
-        bint current_hash=0;
-        bint over=1;
+        cout<<"Hash Length: "<<hash_length<<endl;
+        for(int i=0;i<patterns.size();i++) {
+            uint32_t hash = rk.pattern_hash(orig_patterns[patterns[i]],hash_length);
+            hash_table[hash%TABLE_SIZE].push_back(make_pair(hash,patterns[i]));
 
-        for(int i=0;i<hash_length;i++) over*=HASH_MOD;
+        }
+        uint32_t current_a=1;
+        uint32_t current_b=0;
 
         for(int i=0;i<text.size();i++) {
-            current_hash*=HASH_MOD;
-            current_hash+=(unsigned char)text[i];
-            current_hash%=over;
- /*           if(i<text.size()-1000) {
-                if(text[i+1]=='A' && text[i+2]=='r' && text[i+3]=='t' && text[i+4]=='a') cout<<"fuc "<<text[i]<<", "<<text[i-1]<<", "<<(int)((unsigned char)text[i])<<endl;
-            }
-*/
-            vector<int>& plist = hash_table[toint(current_hash%TABLE_SIZE)];
-            for(auto it = plist.begin(); it!=plist.end();it++) {
+            if(i<hash_length) {
+                current_a+=(unsigned char)text[i];
+                current_b+=current_a;
+                current_a %= HASH_MOD;
+                current_b %= HASH_MOD;
+            } else {
+                int rem=(unsigned char)text[i-hash_length];
+                int add=(unsigned char)text[i];
+                current_b=current_b+current_a-(hash_length+1)*rem-1+add;
+                current_a+=add-rem;
+                current_b%=HASH_MOD;
+                current_a%=HASH_MOD;
 
-                if(rk.check_match(text,orig_patterns[*it],i-hash_length+1)) {
-                    int a=*it;
-                    out.push_back(::match(i-hash_length+1,a));
+            }
+            if(i>=hash_length-1) {
+                uint32_t current_hash = (current_b << 16) | current_a;
+                vector<pair<uint32_t,int> >& plist = hash_table[current_hash%TABLE_SIZE];
+                for(auto it = plist.begin(); it!=plist.end();it++) {
+                    uint32_t hash = it->first;
+                    if(hash!=current_hash) continue;
+                    int w = it->second;
+                    
+                    if(rk.check_match(text,orig_patterns[w],i-hash_length+1)) {
+                        
+                        out.push_back(::match(i-hash_length+1,w));
+                    }
                 }
             }
         }   
     }
 
 
-    }
+}
 

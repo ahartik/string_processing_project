@@ -53,7 +53,7 @@ void print_diff(match_vector& a, match_vector& b) {
 
 int main(int argc, char** argv)
 {
-    srand(time(0));
+   // srand(time(0));
     if(argc==3) {
         cout<<"Text: "<<argv[1]<<"\n";
         cout<<"Patterns: "<<argv[2]<<"\n";
@@ -83,6 +83,8 @@ int main(int argc, char** argv)
         {
             patterns.push_back(random_string(10 + (j * N) / (M * 20)));
         }
+        patterns[0]="AAAAAAAAAA";
+        for(int i=0;i<10;i++) text[i]='A';
     }
     cout << "Generated\n";
 
