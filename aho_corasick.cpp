@@ -15,21 +15,6 @@
 typedef std::tr1::array<int, 256> iarr256;
 using namespace std;
 
-namespace std
-{
-    namespace tr1
-    {
-        template<>
-            struct hash<std::pair<int,char> >
-            {
-                size_t operator()(const std::pair<int, char>& c) const
-                {
-                    return c.first*256 + c.second;
-                }
-            };
-    }
-}
-
 class edge
 {
     public:
@@ -41,9 +26,7 @@ class edge
     {}
     bool operator<(const edge& e)const
     {
-        if (c != e.c)
-            return c < e.c;
-        return to < e.to;
+        return c < e.c;
     }
 };
 
@@ -101,7 +84,7 @@ class ac_machine
         return m_child[node].get(c);
     }
     public:
-    vector<tr1::unordered_set<int> > patterns;
+    vector<vector<int> > patterns;
     vector<int> fail;
     void set_child(int node, char c, int next)
     {
@@ -122,7 +105,7 @@ class ac_machine
         //for (int i = 0; i < 256; i++)
             //m_child.back()[i] = -1;
         fail.push_back(1);
-        patterns.push_back(tr1::unordered_set<int>());
+        patterns.push_back(vector<int>());
         return n()-1;
     }
     
@@ -150,7 +133,7 @@ class ac_machine
                 v = u;
                 j++;
             }
-            patterns[v].insert(i);
+            patterns[v].push_back(i);
         }
         for (int i = 0; i< m_child.size(); i++)
             m_child[i].sort();
@@ -185,11 +168,16 @@ class ac_machine
                     }
                     w = x;
                     fail[v] = w;
-                    patterns[v].insert(patterns[w].begin(), patterns[w].end());
+                    patterns[v].insert(patterns[v].end(), patterns[w].begin(), patterns[w].end());
+
+                    std::sort(patterns[v].begin(), patterns[v].end());
+                    auto last = std::unique(patterns[v].begin(), patterns[v].end());
+                    patterns[v].erase(last, patterns[v].end());
                     q.push(v);
                 }
             }
         }
+        cout << "Machine ready\n";
     }
     int root()const
     {
@@ -207,11 +195,14 @@ void aho_corasick_matcher::match(
     for (size_t i = 0; i < text.size(); i++)
     {
         char c = text[i];
-        while (v && !machine.has_child(v,c))
+        int x;
+        while (v && ((x=machine.get_child(v,c))==-1))
             v = machine.fail[v];
-        v = machine.get_child(v,c);
-        if (v == -1)
+
+        if (v == 0)
             v = machine.root();
+        else
+            v = x;
         BOOST_FOREACH(int p, machine.patterns[v])
         {
             out.push_back(::match(i-patterns[p].size()+1, p));
