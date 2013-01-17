@@ -16,6 +16,10 @@ public:
         return o.start == start &&
                o.pattern == pattern;
     }
+    bool operator<(const match& o) const {
+        if(o.start==start)return pattern<o.pattern;
+        return start<o.start;
+    }
 };
 
 typedef std::vector<match> match_vector;
