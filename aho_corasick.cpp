@@ -1,6 +1,7 @@
 #include"match.hpp"
+
 #include<algorithm>
-#include<bitset>
+#include"bitset.hpp"
 #include<utility>
 #include<iostream>
 #include<boost/foreach.hpp>
@@ -20,6 +21,12 @@ class edge
     public:
     int to;
     char c;
+    edge():
+        c(0),
+        to(0)
+    {
+        
+    }
     edge(char x,int z):
         to(z),
         c(x)
@@ -30,58 +37,70 @@ class edge
     }
 };
 
+
+#include <boost/iterator/iterator_facade.hpp>
+
+
 class trie_array
 {
-    public:
-    typedef vector<edge> vec_type;
-    typedef vec_type::iterator iterator;
-    private:
-    vec_type vec;
-
-    public:
+public:
+    class iterator;
+    friend class iterator;
+private:
+    vector<int> edges;
+    bitset<256> skip;
+public:
+    trie_array() 
+    {
+    }
+    char first_char()
+    {
+        return char(skip.next_set(0));
+    }
+    size_t edge_count() const
+    {
+        return edges.size();
+    }
+    char next_char(char last_char)const
+    {
+        uint8_t x = last_char;
+        x++;
+        x = skip.next_set(x);
+        return x;
+    }
+    bool has_next(char c)const
+    {
+        uint8_t x = c;
+        x++;
+        return skip.next_set(x)!=256;
+    }
 
     int get(char c)
     {
-        for (int i = 0 ; i < vec.size(); i++)
-            if (vec[i].c == c)
-                return vec[i].to;
-        return -1;
+        uint8_t uc = c;
+        if (skip[uc] == 0)
+            return -1;
+        return edges[skip.rank(uc)];
     }
-    int fast_get(char c)
+    void add(char c, int to)
     {
-        vec_type::iterator it = std::lower_bound(vec.begin(), vec.end(), edge(c,0));
-        if (it==vec.end())return -1;
-        if (it->c != c)return -1;
-        return it->to;
-    }
-    void sort()
-    {
-        std::sort(vec.begin(), vec.end());
-    }
-    void add(char c,int x)
-    {
-        vec.push_back(edge(c, x));
-    }
-    vec_type::iterator begin()
-    {
-        return vec.begin();
-    }
-    vec_type::iterator end()
-    {
-        return vec.end();
+        uint8_t b = c;
+        size_t r = skip.rank(b);
+        if(skip[b])
+        {
+            edges[skip.rank(b)]=to;
+            return;
+        }
+        skip[b] = 1;
+        edges.insert(edges.begin() + r, to);
     }
 };
-
 class ac_machine
 {
     vector<trie_array> m_child;
     int n() const
     {
         return fail.size();
-    }
-    int i_get_child(int node, char c)
-    {
-        return m_child[node].get(c);
     }
     public:
     vector<vector<int> > patterns;
@@ -92,7 +111,7 @@ class ac_machine
     }
     int get_child(int node, char c)
     {
-        return m_child[node].fast_get(c);
+        return m_child[node].get(c);
     }
     bool has_child(int node, char c)
     {
@@ -121,7 +140,7 @@ class ac_machine
             int j = 0;
             const string& pat = pats[i];
             int x;
-            while ((x = i_get_child(v,pat[j]))!=-1)
+            while ((x = get_child(v,pat[j]))!=-1)
             {
                 v = x;
                 j++;
@@ -135,8 +154,9 @@ class ac_machine
             }
             patterns[v].push_back(i);
         }
-        for (int i = 0; i< m_child.size(); i++)
-            m_child[i].sort();
+
+        // for (int i = 0; i< m_child.size(); i++)
+            // m_child[i].sort();
             
         // Trie is ready.
         // Need to solve fail function
@@ -148,34 +168,31 @@ class ac_machine
         {
             int u = q.front();
             q.pop();
-            for (trie_array::iterator it = m_child[u].begin();
-                 it!=m_child[u].end();
-                 ++it)
+            char c=m_child[u].first_char();
+            for(int j=0;j<m_child[u].edge_count();j++,
+                c=m_child[u].next_char(c))
             {
-                char c = it->c;
-                int v = it->to;
+                int v = m_child[u].get(c);
+                int w = fail[u];
+                int x = 1;
+                while ((x=get_child(w,c))==-1)
                 {
-                    int w = fail[u];
-                    int x = 1;
-                    while ((x=get_child(w,c))==-1)
+                    w = fail[w];
+                    if (w == 0)
                     {
-                        w = fail[w];
-                        if (w == 0)
-                        {
-                            x = root;
-                            break;
-                        }
+                        x = root;
+                        break;
                     }
-                    w = x;
-                    fail[v] = w;
-                    patterns[v].insert(patterns[v].end(), patterns[w].begin(), patterns[w].end());
-
-                    std::sort(patterns[v].begin(), patterns[v].end());
-                    auto last = std::unique(patterns[v].begin(), patterns[v].end());
-                    patterns[v].erase(last, patterns[v].end());
-                    q.push(v);
                 }
-            }
+                w = x;
+                fail[v] = w;
+                patterns[v].insert(patterns[v].end(), patterns[w].begin(), patterns[w].end());
+
+                std::sort(patterns[v].begin(), patterns[v].end());
+                auto last = std::unique(patterns[v].begin(), patterns[v].end());
+                patterns[v].erase(last, patterns[v].end());
+                q.push(v);
+            };
         }
         cout << "Machine ready\n";
     }

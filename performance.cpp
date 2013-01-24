@@ -100,7 +100,7 @@ int main(int argc, char** argv)
         string lp("BB");
         for (int j = 0; j < M / P - 1; j++)
         {
-            lp+="BB";
+            lp+="BBBB";
             patterns.push_back(lp);
         }
     }
