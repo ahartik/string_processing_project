@@ -54,29 +54,18 @@ void print_diff(match_vector& a, match_vector& b) {
 int main(int argc, char** argv)
 {
     srand(0);
-    if(argc==3) {
+    int matcher_test=-1;
+    if(argc>=3) {
         cout<<"Text: "<<argv[1]<<"\n";
         cout<<"Patterns: "<<argv[2]<<"\n";
 
-        text = read_text(argv[1]).substr(0,6000000);
+        text = read_text(argv[1]);
         
         vector<string> words = read_words(argv[2]);
-        words.resize(50000);
-        int i=0;
-        string current="";
-        while(i<words.size()) {
-            if(current=="") current=words[i++];
-            else if(i%3==0) {
-                patterns.push_back(current);
-                current="";
-            } else {
-                current+=" "+words[i++];
-            }
-        }
-      /*  match_vector a,b;
-        matcher_list[0]->match(text, patterns, a);
-        matcher_list[1]->match(text, patterns, b);
-        print_diff(a,b);*/
+        for(int i=0;i<words.size();i++) patterns.push_back(words[i]);
+        cout<<text.length()<<endl;
+        cout<<patterns.size()<<endl;
+        if(argc==4) matcher_test=atoi(argv[3]);
     } else {
 
         for (int j = 0; j < M; j++)
@@ -109,6 +98,7 @@ int main(int argc, char** argv)
 
     for (int i = 0; i < matcher_list_size; i++)
     {
+        if(matcher_test != -1 && matcher_test!=i) continue;
         matcher_time(matcher_list[i]);
     }
 }
