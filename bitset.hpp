@@ -9,7 +9,7 @@
 template<size_t Size>
 class bitset
 {
-    static const int WordCount = (Size+63)/64;
+    static const size_t WordCount = (Size+63)/64;
     uint64_t words[WordCount];
 
     static int popcnt(uint64_t x)
@@ -81,10 +81,13 @@ class bitset
         uint64_t mask = ~((1ULL<<o)-1);
         for (; w < WordCount; w++)
         {
-            int f = ffsll(words[w]&mask);
+            uint64_t m = words[w]&mask;
             mask = -1ULL;
-            if (f)
+            if (m)
+            {
+                int f = ffsll(m);
                 return w*64+f-1;
+            }
         }
         return Size;
     }

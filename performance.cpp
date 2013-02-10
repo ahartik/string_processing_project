@@ -77,6 +77,26 @@ int main(int argc, char** argv)
         matcher_list[0]->match(text, patterns, a);
         matcher_list[1]->match(text, patterns, b);
         print_diff(a,b);*/
+    } else if (argc == 2) {
+        text = "";
+        cout<<"Patterns: "<<argv[1]<<"\n";
+        vector<string> words = read_words(argv[1]);
+        words.resize(50000);
+        int i=0;
+        int total_len = 0;
+        string current="";
+        while(i<words.size()) {
+            if(current=="") current=words[i++];
+            else if(i%3==0) {
+                total_len+=current.size();
+                patterns.push_back(current);
+                current="";
+            } else {
+                current+=" "+words[i++];
+            }
+        }
+        cout << "Total pattern length: "<<total_len<<"\n";
+
     } else {
 
         for (int j = 0; j < M; j++)
