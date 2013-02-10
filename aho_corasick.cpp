@@ -160,6 +160,7 @@ class ac_node
         }
         if (is_compact())
         {
+            assert(oc != c);
             char oc = compact_c();
             int oto = compact_to();
             many.arr = new trie_array();
@@ -199,6 +200,7 @@ class ac_node
     friend void swap(ac_node& a, ac_node& b)
     {
         ac_node t;
+        // Raw memory copy
         memcpy(&t, &a, sizeof(ac_node));
         memcpy(&a, &b, sizeof(ac_node));
         memcpy(&b, &t, sizeof(ac_node));
@@ -300,7 +302,8 @@ class ac_machine
                 }
                 w = x;
                 fail[v] = w;
-                patterns[v].merge(forward_list<int>(patterns[v]));
+                forward_list<int> t(patterns[w]);
+                patterns[v].merge(t);
                 patterns[v].unique();
                 q.push(v);
             };
