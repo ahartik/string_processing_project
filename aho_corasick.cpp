@@ -1,5 +1,6 @@
 #include"match.hpp"
-
+#include<list>
+#include<forward_list>
 #include<algorithm>
 #include"bitset.hpp"
 #include<utility>
@@ -94,15 +95,125 @@ public:
         edges.insert(edges.begin() + r, to);
     }
 };
+
+class ac_node
+{
+    union
+    {
+        struct 
+        {
+            int32_t c;
+            uint32_t to;
+        } single;
+        struct {
+            char pad[sizeof(single)-sizeof(trie_array*)];
+            trie_array* arr;
+        } many;
+    };
+
+    int compact_to() const
+    {
+        return single.to>>1;
+    }
+    char compact_c() const
+    {
+        return single.c;
+    }
+    bool empty() const
+    {
+        return many.arr == NULL;
+    }
+    public:
+    ac_node():
+        single{0,0}
+    {
+    }
+    ac_node(const ac_node& c)
+    {
+        if(c.is_compact() || c.empty())
+            this->single = c.single;
+        else this->many.arr = new trie_array(*(c.many.arr));
+    }
+
+    bool is_compact() const
+    {
+        return bool(single.to&1);
+    }
+
+    int count() const
+    {
+        if (is_compact()) {
+            return 1;
+        }
+        if (many.arr==NULL)
+            return 0;
+        return many.arr->edge_count();
+    }
+    void add(char c, int n)
+    {
+        if (empty())
+        {
+            single.c = c;
+            single.to = n<<1;
+            single.to |= 1;
+            return;
+        }
+        if (is_compact())
+        {
+            char oc = compact_c();
+            int oto = compact_to();
+            many.arr = new trie_array();
+            many.arr->add(oc, oto);
+        }
+        many.arr->add(c,n);
+    }
+    int get(char c)
+    {
+        if (empty()) return -1;
+        if(is_compact())
+        {
+            if(c==compact_c())
+                return compact_to();
+            return -1;
+        }
+        return many.arr->get(c);
+    }
+    char first_char()
+    {
+        if (empty())return 0;
+        if (is_compact())
+            return compact_c();
+        return many.arr->first_char();
+    }
+    char next_char(char last_char)const
+    {
+        if (empty() || is_compact()) return 0;
+        return many.arr->next_char(last_char);
+    }
+    ~ac_node()
+    {
+        if(!is_compact())
+            delete many.arr;
+    }
+
+    friend void swap(ac_node& a, ac_node& b)
+    {
+        ac_node t;
+        memcpy(&t, &a, sizeof(ac_node));
+        memcpy(&a, &b, sizeof(ac_node));
+        memcpy(&b, &t, sizeof(ac_node));
+    }
+};
 class ac_machine
 {
-    vector<trie_array> m_child;
+    vector<ac_node> m_child;
+    
     int n() const
     {
         return fail.size();
     }
     public:
-    vector<vector<int> > patterns;
+    vector<forward_list<int>> patterns;
     vector<int> fail;
     void set_child(int node, char c, int next)
     {
@@ -118,11 +229,9 @@ class ac_machine
     }
     int add_node()
     {
-        m_child.push_back(trie_array());
-        //for (int i = 0; i < 256; i++)
-            //m_child.back()[i] = -1;
+        m_child.push_back(ac_node());
         fail.push_back(1);
-        patterns.push_back(vector<int>());
+        patterns.push_back(forward_list<int>());
         return n()-1;
     }
     
@@ -132,6 +241,7 @@ class ac_machine
         int root = add_node();
         fail[root] = fallback;
 
+        
         for (size_t i = 0; i < pats.size(); i++)
         {
             int v = root;
@@ -150,18 +260,18 @@ class ac_machine
                 v = u;
                 j++;
             }
-            patterns[v].push_back(i);
+            patterns[v].push_front(i);
         }
+        for (size_t i = 0; i < m_child.size();i++)
+            patterns[i].sort();
 
-        cout << m_child.size() << " nodes\n";
-        int ones = 0;
-        for(size_t i=0;i<m_child.size();i++)
-        {
-            if(m_child[i].edge_count()<=1)
-                ones++;
-        }
-        cout <<"ones="<<ones<<"\n";
-            
+        cout << m_child.size()<<" Nodes\n";
+        int uncompact = 0;
+        for (int i = 0; i < m_child.size(); i++)
+            if(!m_child[i].is_compact())
+                uncompact++;
+        cout << uncompact << " Uncompact\n";
+
         // Trie is ready.
         // Need to solve fail function
         queue<int> q;
@@ -173,7 +283,7 @@ class ac_machine
             int u = q.front();
             q.pop();
             char c=m_child[u].first_char();
-            for(size_t j=0;j<m_child[u].edge_count();j++,
+            for(int j=0;j<m_child[u].count();j++,
                 c=m_child[u].next_char(c))
             {
                 int v = m_child[u].get(c);
@@ -190,11 +300,8 @@ class ac_machine
                 }
                 w = x;
                 fail[v] = w;
-                patterns[v].insert(patterns[v].end(), patterns[w].begin(), patterns[w].end());
-
-                std::sort(patterns[v].begin(), patterns[v].end());
-                auto last = std::unique(patterns[v].begin(), patterns[v].end());
-                patterns[v].erase(last, patterns[v].end());
+                patterns[v].merge(forward_list<int>(patterns[v]));
+                patterns[v].unique();
                 q.push(v);
             };
         }
