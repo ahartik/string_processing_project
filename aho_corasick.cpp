@@ -153,8 +153,14 @@ class ac_machine
             patterns[v].push_back(i);
         }
 
-        // for (int i = 0; i< m_child.size(); i++)
-            // m_child[i].sort();
+        cout << m_child.size() << " nodes\n";
+        int ones = 0;
+        for(size_t i=0;i<m_child.size();i++)
+        {
+            if(m_child[i].edge_count()<=1)
+                ones++;
+        }
+        cout <<"ones="<<ones<<"\n";
             
         // Trie is ready.
         // Need to solve fail function
