@@ -1,4 +1,5 @@
 #include<vector>
+#include<sstream>
 #include<iostream>
 #include<fstream>
 using namespace std;
@@ -17,8 +18,8 @@ vector<string> read_words(const char* filename) {
 }
 
 string read_text(const char* filename) {
-    vector<string> words=read_words(filename);
-    string s="";
-    for(int i=0;i<words.size();i++) s+=(i>0 ? " " : "") + words[i];
-    return s;
+    std::ifstream t(filename);
+    std::stringstream buffer;
+    buffer << t.rdbuf();
+    return buffer.str();
 }
