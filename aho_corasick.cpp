@@ -13,7 +13,6 @@
 #include<cassert>
 #include<tr1/array>
 
-typedef std::tr1::array<int, 256> iarr256;
 using namespace std;
 
 class edge
@@ -22,8 +21,8 @@ class edge
     int to;
     char c;
     edge():
-        c(0),
-        to(0)
+        to(0),
+        c(0)
     {
         
     }
@@ -119,7 +118,6 @@ class ac_machine
     }
     int add_node()
     {
-        //m_child.push_back(iarr256());
         m_child.push_back(trie_array());
         //for (int i = 0; i < 256; i++)
             //m_child.back()[i] = -1;
@@ -134,10 +132,10 @@ class ac_machine
         int root = add_node();
         fail[root] = fallback;
 
-        for (int i = 0; i < pats.size(); i++)
+        for (size_t i = 0; i < pats.size(); i++)
         {
             int v = root;
-            int j = 0;
+            size_t j = 0;
             const string& pat = pats[i];
             int x;
             while ((x = get_child(v,pat[j]))!=-1)
@@ -155,8 +153,14 @@ class ac_machine
             patterns[v].push_back(i);
         }
 
-        // for (int i = 0; i< m_child.size(); i++)
-            // m_child[i].sort();
+        cout << m_child.size() << " nodes\n";
+        int ones = 0;
+        for(size_t i=0;i<m_child.size();i++)
+        {
+            if(m_child[i].edge_count()<=1)
+                ones++;
+        }
+        cout <<"ones="<<ones<<"\n";
             
         // Trie is ready.
         // Need to solve fail function
@@ -169,7 +173,7 @@ class ac_machine
             int u = q.front();
             q.pop();
             char c=m_child[u].first_char();
-            for(int j=0;j<m_child[u].edge_count();j++,
+            for(size_t j=0;j<m_child[u].edge_count();j++,
                 c=m_child[u].next_char(c))
             {
                 int v = m_child[u].get(c);

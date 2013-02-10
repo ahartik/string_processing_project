@@ -60,7 +60,7 @@ int main(int argc, char** argv)
         cout<<"Patterns: "<<argv[2]<<"\n";
 
         text = read_text(argv[1]);
-        
+
         vector<string> words = read_words(argv[2]);
         for(int i=0;i<words.size();i++) patterns.push_back(words[i]);
         cout<<text.length()<<endl;
