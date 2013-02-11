@@ -45,5 +45,5 @@ def book_test(id, textbook, patternbook, pattern_length, pattern_count):
     os.system("rm text")
     return r
 
-print random_test(1,30,5000000,120000,19)
-#print book_test(1,"../musketeers.txt","../robinson.txt",10,500)
+#print random_test(1,30,5000000,120000,19)
+print book_test(0,"../musketeers.txt","../robinson.txt",10,50000)

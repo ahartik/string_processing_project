@@ -15,24 +15,24 @@ const int TABLE_SIZE=200003;
 
 class rabin_karp_adler {
     public:
-    bool check_match(const string& text, const string& pattern, int text_index) 
-    {
-        if(text.size() -text_index < pattern.size()) return false;
-        for(int i=pattern.size()-1;i>=0;i--) 
-            if(pattern[i] != text[text_index+i]) return false;
-        return true;
-    }
-    uint32_t pattern_hash(const string& pattern, int hash_length) {
-        uint32_t hash_a=1;
-        uint32_t hash_b=0;
-        for(int i=0;i<hash_length;i++) {
-            hash_a+=(unsigned char)pattern[i];
-            hash_b+=hash_a;
-            hash_a%=HASH_MOD;
-            hash_b%=HASH_MOD;
+        bool check_match(const string& text, const string& pattern, int text_index) 
+        {
+            if(text.size() -text_index < pattern.size()) return false;
+            for(int i=pattern.size()-1;i>=0;i--) 
+                if(pattern[i] != text[text_index+i]) return false;
+            return true;
         }
-        return (hash_b<<16) | hash_a;
-    }
+        uint32_t pattern_hash(const string& pattern, int hash_length) {
+            uint32_t hash_a=1;
+            uint32_t hash_b=0;
+            for(int i=0;i<hash_length;i++) {
+                hash_a+=(unsigned char)pattern[i];
+                hash_b+=hash_a;
+                hash_a%=HASH_MOD;
+                hash_b%=HASH_MOD;
+            }
+            return (hash_b<<16) | hash_a;
+        }
 };
 
 void rabin_karp_adler_matcher::match(
@@ -49,18 +49,12 @@ void rabin_karp_adler_matcher::match(
             if(orig_patterns[i].size()<hash_sizes[j]) {
                 sect_patterns[j-1].push_back(i);
                 t=true; 
-                 break;
+                break;
             }
         }
         if(!t) sect_patterns[sect_patterns.size()-1].push_back(i);
     }
     for(int size=0;size<sect_patterns.size();size++) {
-        int mismatch=0;
-        int modmismatch=0;
-        int hashmismatch=0;
-        int suffixmismatch=0;
-        int correct=0;
-        int hashcorrect=0;
         vector<vector<pair<uint32_t,int> > > hash_table(TABLE_SIZE);
         vector<int>& patterns = sect_patterns[size];
         if(patterns.size()==0) continue;
@@ -97,35 +91,17 @@ void rabin_karp_adler_matcher::match(
                 for(auto it = plist.begin(); it!=plist.end();it++) {
                     uint32_t hash = it->first;
                     if(hash!=current_hash) {
-                        modmismatch++;
                         continue;
 
                     }
                     int w = it->second;
                     if(rk.check_match(text,orig_patterns[w],i-hash_length+1)) {
                         out.push_back(::match(i-hash_length+1,w));
-                        correct++;
-                    } else {
-                        bool t=true;
-                        for(int j=0;j<hash_length;j++)  {
-                            if(text[j+i-hash_length+1]!=orig_patterns[w][j]) t=false;
-                        }
-                        if(t) suffixmismatch++;
-                        else hashmismatch++;
-                        
                     }
                 }
             }
         }   
-        double total=0.01*(suffixmismatch+hashmismatch+modmismatch+correct);
-        cout.precision(1);
-        cout<<"Correct: "<<fixed<<correct/total<<"%\n";
-        cout<<"Mod mismatch: "<<fixed<<modmismatch/total<<"%\n";
-        cout<<"Hash mismatch: "<<fixed<<hashmismatch/total<<"%\n";
-        cout<<"Suffix mismatch: "<<fixed<<suffixmismatch/total<<"%\n";
-        cout<<endl;
-        cout.precision(4);
-    }
+}
 
 
 }
