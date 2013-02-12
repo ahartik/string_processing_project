@@ -41,7 +41,6 @@ void rabin_karp_matcher<T>::match(
     rabin_karp rk;
 
     int hash_sizes[]={1,5,10,20,30,40,50,60,70,80,90,100}; // Fixed pattern lengths
-
     vector<vector<int> > sect_patterns(12); 
 
     // Divide patterns into groups by pattern length (according to hash_sizes)
@@ -89,7 +88,6 @@ void rabin_karp_matcher<T>::match(
             current_hash = hash_function.rolling_hash(current_hash,next_character,prev_character);
             if(i>=hash_length-1) {
                 forward_list<pair<int64_t,int> >& plist = hash_table[current_hash%TABLE_SIZE];
-                bool found=false;
                 // For each pattern for which [hash % TABLE_SIZE] equals [current_hash % TABLE_SIZE]:
                 for(auto it = plist.begin(); it!=plist.end();it++) {
                     
