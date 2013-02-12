@@ -54,7 +54,7 @@ void rabin_karp_matcher<T>::match(
         }
         if(!t) sect_patterns[sect_patterns.size()-1].push_back(i);
     }
-    // For each pattern lenght group:
+    // For each pattern length group:
     for(int size=0;size<sect_patterns.size();size++) {
         
         vector<forward_list<pair<int64_t,int> > > hash_table(TABLE_SIZE);
@@ -90,16 +90,16 @@ void rabin_karp_matcher<T>::match(
             if(i>=hash_length-1) {
 
                 forward_list<pair<int64_t,int> >& plist = hash_table[current_hash%TABLE_SIZE];
-                // For each pattern for which [hash % TABLE_SIZE] equals [current_hash % TABLE_SIZE]:
+                // For each pattern for which (hash % TABLE_SIZE) equals (current_hash % TABLE_SIZE):
                 for(auto it = plist.begin(); it!=plist.end();it++) {
                     
                     int64_t hash = it->first;
-                    // If [hash] != [current_hash], this is a false alarm
+                    // If (hash) != (current_hash), this is a false alarm
                     if(hash!=current_hash) {
                         continue;
                     }
 
-                    // If [hash] == [current_hash], try to match the pattern
+                    // If (hash) == (current_hash), try to match the pattern
                     int w = it->second;
                     if(check_match(text,orig_patterns[w],i-hash_length+1)) {
                         out.push_back(::match(i-hash_length+1,w));
