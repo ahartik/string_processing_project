@@ -32,7 +32,7 @@ class rabin_karp_hash {
 
         std::string name() const
         {
-            return "Modulo";
+            return "Original";
         }
 };
 /*
