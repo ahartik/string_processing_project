@@ -42,8 +42,9 @@ void rabin_karp_adler_matcher::match(
         match_vector& out) const
 {
     rabin_karp_adler rk;
-    int hash_sizes[]={1,6};
-    vector<vector<int> > sect_patterns(2);
+    int hash_sizes[]={1,5,10,20,30,40,50,60,70,80,90,100}; // Fixed pattern lengths
+
+    vector<vector<int> > sect_patterns(12); 
     for(int i=0;i<orig_patterns.size();i++) {
         bool t=false;
         for(int j=1;j<sect_patterns.size();j++) {
