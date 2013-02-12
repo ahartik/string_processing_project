@@ -36,12 +36,25 @@ class edge
     }
 };
 
+struct ac_node_info
+{
+    uint32_t fail;
+    uint16_t pad1;
+    char c;
+    unsigned pad2 : 4;
+    bool has_next : 1;
+    bool matches : 1;
+    bool contains : 1;
+    bool compact : 1;
+};
+
 class trie_array
 {
 private:
     vector<int> edges;
     bitset<256> skip;
 public:
+    ac_node_info info;
     trie_array() 
     {
     }
@@ -64,7 +77,7 @@ public:
     {
         uint8_t x = c;
         x++;
-        return skip.next_set(x)!=256;
+        return skip.next_set(x) != 256;
     }
 
     int get(char c)
@@ -102,38 +115,36 @@ class ac_node
 {
     union
     {
-        struct 
-        {
-            int32_t c;
-            uint32_t to;
-        } single;
+        ac_node_info single;
         struct {
             char pad[sizeof(single)-sizeof(trie_array*)];
             trie_array* arr;
         } many;
     };
 
-    int compact_to() const
-    {
-        return single.to>>1;
-    }
     char compact_c() const
     {
         return single.c;
     }
     bool empty() const
     {
-        return many.arr == NULL;
+        return is_compact() && !single.has_next;
     }
     public:
-    ac_node():
-        single{0,0}
+    ac_node()
     {
+        single.fail = 0;
+        single.c = 0;
+        single.has_next = 0;
+        single.matches = 0;
+        single.contains = 0;
+        single.compact = 1;
     }
-    ac_node(ac_node&& c) noexcept
+    ac_node(ac_node&& c)
     {
         memcpy(this, &c, sizeof(ac_node));
         memset(&c, 0 ,sizeof(ac_node));
+        c.single.compact = 1;
     }
     ac_node(const ac_node& c)
     {
@@ -144,44 +155,54 @@ class ac_node
 
     bool is_compact() const
     {
-        return bool(single.to&1);
+        return single.compact;
     }
 
     int count() const
     {
         if (is_compact()) {
-            return 1;
+            return single.has_next;
         }
         if (many.arr==NULL)
             return 0;
         return many.arr->edge_count();
     }
-    void add(char c, int n)
+
+    void add(int thiz, char c, int n)
     {
-        if (empty())
+        if (empty() && n == thiz + 1)
         {
             single.c = c;
-            single.to = n<<1;
-            single.to |= 1;
+            single.has_next = 1;
             return;
         }
-        if (is_compact())
+        else if (is_compact() && single.has_next)
         {
             char oc = compact_c();
             assert(oc != c);
-            int oto = compact_to();
+            int oto = thiz + 1;
+            ac_node_info info = single;
             many.arr = new trie_array();
             many.arr->add(oc, oto);
+            many.arr->info = info;
         }
-        many.arr->add(c,n);
+        else if(is_compact())
+        {
+            ac_node_info info = single;
+            many.arr = new trie_array();
+            many.arr->info = info;
+        }
+        many.arr->add(c, n);
+        assert(info().fail==0);
     }
-    int get(char c)
+    int get(int thiz, char c)
     {
         if (empty()) return -1;
         if(is_compact())
         {
             if(c==compact_c())
-                return compact_to();
+                return thiz+1;
+
             return -1;
         }
         return many.arr->get(c);
@@ -198,31 +219,43 @@ class ac_node
         if (empty() || is_compact()) return 0;
         return many.arr->next_char(last_char);
     }
+
+    ac_node_info& info()
+    {
+        if (single.compact)
+            return single;
+        return many.arr->info;
+    }
+    const ac_node_info& info() const
+    {
+        if (single.compact)
+            return single;
+        return many.arr->info;
+    }
     ~ac_node()
     {
         if(!is_compact())
             delete many.arr;
     }
-
 };
+
 class ac_machine
 {
     vector<ac_node> m_child;
     
     int n() const
     {
-        return fail.size();
+        return m_child.size();
     }
     public:
-    vector<forward_list<int>> patterns;
-    vector<int> fail;
+    vector<pair<int,int>> patterns;
     void set_child(int node, char c, int next)
     {
-        return m_child[node].add(c, next);
+        return m_child[node].add(node, c, next);
     }
     int get_child(int node, char c)
     {
-        return m_child[node].get(c);
+        return m_child[node].get(node, c);
     }
     bool has_child(int node, char c)
     {
@@ -231,17 +264,17 @@ class ac_machine
     int add_node()
     {
         m_child.push_back(ac_node());
-        fail.push_back(1);
-        patterns.push_back(forward_list<int>());
         return n()-1;
+    }
+    int fail(int n) const
+    {
+        return m_child[n].info().fail;
     }
     
     ac_machine(const vector<string>& pats)
     {
         int fallback = add_node();
         int root = add_node();
-        fail[root] = fallback;
-
         
         for (size_t i = 0; i < pats.size(); i++)
         {
@@ -261,32 +294,34 @@ class ac_machine
                 v = u;
                 j++;
             }
-            patterns[v].push_front(i);
+            m_child[v].info().matches = 1;
+            m_child[v].info().contains = 1;
+            patterns.emplace_back(v,i);
         }
-        for (size_t i = 0; i < m_child.size();i++)
-            patterns[i].sort();
 
-
+        std::sort(patterns.begin(), patterns.end());
+        
         // Trie is ready.
         // Need to solve fail function
         queue<int> q;
         q.push(root);
-        fail[fallback] = fallback;
-        fail[root] = fallback;
+        m_child[fallback].info().fail = fallback;
+        m_child[root].info().fail = fallback;
         while (q.size() != 0)
         {
             int u = q.front();
             q.pop();
             char c=m_child[u].first_char();
+
             for(int j=0;j<m_child[u].count();j++,
                 c=m_child[u].next_char(c))
             {
-                int v = m_child[u].get(c);
-                int w = fail[u];
+                int v = get_child(u,c);
+                int w = fail(u);
                 int x = 1;
                 while ((x=get_child(w,c))==-1)
                 {
-                    w = fail[w];
+                    w = fail(w);
                     if (w == 0)
                     {
                         x = root;
@@ -294,26 +329,33 @@ class ac_machine
                     }
                 }
                 w = x;
-                fail[v] = w;
-                forward_list<int> t(patterns[w]);
-                patterns[v].merge(std::move(t));
-                patterns[v].unique();
+                assert(m_child[v].info().fail == 0);
+                m_child[v].info().fail = w;
+                m_child[v].info().matches |= m_child[w].info().matches;
                 q.push(v);
             };
         }
         cout << "Machine ready\n";
-        cout << m_child.size()<<" Nodes\n";
+        cout << m_child.size() << " Nodes\n";
         int uncompact = 0;
         int accept = 0;
-        for (int i = 0; i < m_child.size(); i++)
+        for (size_t i = 0; i < m_child.size(); i++)
         {
-            if (!patterns[i].empty())
+            if (matches(i))
                 accept++;
             if (!m_child[i].is_compact())
                 uncompact++;
         }
         cout << uncompact << " Uncompact\n";
         cout << accept << " accepting\n";
+    }
+    bool contains_match(int v) const
+    {
+        return m_child[v].info().contains;
+    }
+    bool matches(int v) const
+    {
+        return m_child[v].info().matches;
     }
     int root()const
     {
@@ -333,15 +375,29 @@ void aho_corasick_matcher::match(
         char c = text[i];
         int x;
         while (v && ((x=machine.get_child(v,c))==-1))
-            v = machine.fail[v];
+            v = machine.fail(v);
 
         if (v == 0)
             v = machine.root();
         else
             v = x;
-        for (int p : machine.patterns[v])
+        x = v;
+
+        const vector<pair<int,int> > &pv = machine.patterns;
+        while (machine.matches(x))
         {
-            out.push_back(::match(i-patterns[p].size()+1, p));
+            if (machine.contains_match(x))
+            {
+                pair<int, int> l(x,0);
+                for (auto it = std::lower_bound(pv.begin(), pv.end(), l);
+                     it != pv.end() && it->first == x;
+                     ++it)
+                {
+                    int p = it->second;
+                    out.push_back(::match(i-patterns[p].size()+1, p));
+                }
+            }
+            x = machine.fail(x);
         }
     }
 }
