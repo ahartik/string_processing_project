@@ -23,7 +23,7 @@ bool rabin_karp_matcher<T>::check_match(const string& text, const string& patter
         return true;
     }
 
-// Calculate the hash of P using P[1... hash_length] and the given template hash function
+// Calculate the hash of pattern P using P[1... hash_length] and the given template hash function
 template <typename T>
 int64_t rabin_karp_matcher<T>::pattern_hash(string pattern, int hash_length) const {
     T hash_function(hash_length);
@@ -39,8 +39,8 @@ void rabin_karp_matcher<T>::match(
         match_vector& out) const
 {
 
-    int hash_sizes[]={1,5,10,20,30,40,50,60,70,80,90,100}; // Fixed pattern lengths for groups
-    vector<vector<int> > sect_patterns(12); 
+    int hash_sizes[]={1,3,6,10,13,15,30,60,100}; // Fixed pattern lengths for groups
+    vector<vector<int> > sect_patterns(9); 
 
     // Divide patterns into groups by pattern length (according to hash_sizes)
     for(int i=0;i<orig_patterns.size();i++) {
@@ -54,7 +54,7 @@ void rabin_karp_matcher<T>::match(
         }
         if(!t) sect_patterns[sect_patterns.size()-1].push_back(i);
     }
-
+    int a=0,b=0;
     // For each pattern lenght group:
     for(int size=0;size<sect_patterns.size();size++) {
         
@@ -104,11 +104,15 @@ void rabin_karp_matcher<T>::match(
                     int w = it->second;
                     if(check_match(text,orig_patterns[w],i-hash_length+1)) {
                         out.push_back(::match(i-hash_length+1,w));
-                    } 
+                        a++;
+                    } else {
+                        b++;
+                    }
                 }
             }
         }   
     }
+    cout<<a<<" vs "<<b<<endl;
 }
 
 #include "rabin_karp_hash.hpp"

@@ -69,6 +69,7 @@ def book_test_dist(ids, textbook, patternbook,text_length, pattern_distribution)
         r =  run_script(id)
         print str(id),
         print r
+    mo
     os.system("rm pattern")
     os.system("rm text")
     return r
@@ -97,5 +98,6 @@ def run_random():
 #run_random()
 #run_book()
 #book_test(ids,"../musketeers.txt","../robinson.txt",150000,4,14000)
-book_test_dist(ids,"../musketeers.txt","../robinson.txt",150000,[(x,2000) for x in xrange(4,15)])
-#random_test_dist(ids,[(x,2000) for x in xrange(4,15)], 550000,70)
+book_test_dist(ids,"../robinson.txt","../musketeers.txt",150000,[(x,2000) for x in xrange(4,15)])
+#book_test_dist(ids,"../musketeers.txt","../robinson.txt",150000,[(x,2000) for x in xrange(4,15)])
+#random_test_dist(ids,[(x,10000) for x in xrange(4,15)], 550000,26)
