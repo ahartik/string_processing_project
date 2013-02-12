@@ -7,7 +7,7 @@ public:
     void match(const std::string& text,
                const std::vector<std::string> patterns,
                match_vector& out) const;
-    const char* name() const
+    std::string name() const
     {
         return "Aho-Corasick";
     }

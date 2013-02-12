@@ -1,7 +1,8 @@
 #ifndef RABIN_KARP_H
 #define RABIN_KARP_H
 #include"match.hpp"
-template <typename T>
+#include<string>
+template <typename Hasher>
 class rabin_karp_matcher : public multiple_matcher
 {
 
@@ -12,9 +13,10 @@ public:
     void match(const std::string& text,
                const std::vector<std::string> patterns,
                match_vector& out) const;
-    const char* name() const
+    std::string name() const
     {
-        return "Rabin-Karp";
+        Hasher h(0);
+        return std::string("Rabin-Karp (")+h.name()+")";
     }
     rabin_karp_matcher(){}
     ~rabin_karp_matcher() {}
