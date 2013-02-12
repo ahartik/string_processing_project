@@ -38,19 +38,6 @@ void matcher_time(const multiple_matcher* m)
     cout<<"------------------------------\n\n";
 }
 
-void print_diff(match_vector& a, match_vector& b) {
-    set<match> aset,bset;
-    for(auto i = a.begin();i!=a.end();i++) aset.insert(*i);
-    for(auto i = b.begin();i!=b.end();i++) bset.insert(*i);
-    for(auto i = a.begin(); i != a.end();i++) {
-        if(bset.count(*i)==0) cout<<"A has "<<(*i).start<<": "<<patterns[(*i).pattern]<<endl;
-        
-    }
-    for(auto i = b.begin();i!=b.end();i++) {
-        if(aset.count(*i)==0) cout<<"B has "<<(*i).start<<": "<<patterns[(*i).pattern]<<endl;
-    }
-}
-
 int main(int argc, char** argv)
 {
     srand(0);

@@ -29,7 +29,8 @@ class edge
     edge(char x,int z):
         to(z),
         c(x)
-    {}
+    {
+    }
     bool operator<(const edge& e)const
     {
         return c < e.c;
@@ -116,7 +117,8 @@ class ac_node
     union
     {
         ac_node_info single;
-        struct {
+        struct 
+        {
             char pad[sizeof(single)-sizeof(trie_array*)];
             trie_array* arr;
         } many;
