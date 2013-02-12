@@ -5,7 +5,6 @@
 #include"bitset.hpp"
 #include<utility>
 #include<iostream>
-#include<boost/foreach.hpp>
 #include<stdint.h>
 #include<tr1/unordered_set>
 #include<tr1/unordered_map>
@@ -37,15 +36,8 @@ class edge
     }
 };
 
-
-#include <boost/iterator/iterator_facade.hpp>
-
-
 class trie_array
 {
-public:
-    class iterator;
-    friend class iterator;
 private:
     vector<int> edges;
     bitset<256> skip;
@@ -96,6 +88,16 @@ public:
     }
 };
 
+/**
+ * Optimized class representing node in Aho-Corasick machine.
+ * This is either compact node with one or zero children.
+ * Or pointer to the trie_array structure.
+ *
+ * This code depends on the fact that pointers created using operator
+ * new will have zeros in their lowest bits. We use the lowest bit
+ * to distinguish compact and non-compact nodes.
+ * 
+ */
 class ac_node
 {
     union
@@ -127,6 +129,11 @@ class ac_node
     ac_node():
         single{0,0}
     {
+    }
+    ac_node(ac_node&& c) noexcept
+    {
+        memcpy(this, &c, sizeof(ac_node));
+        memset(&c, 0 ,sizeof(ac_node));
     }
     ac_node(const ac_node& c)
     {
@@ -160,8 +167,8 @@ class ac_node
         }
         if (is_compact())
         {
-            assert(oc != c);
             char oc = compact_c();
+            assert(oc != c);
             int oto = compact_to();
             many.arr = new trie_array();
             many.arr->add(oc, oto);
@@ -197,14 +204,6 @@ class ac_node
             delete many.arr;
     }
 
-    friend void swap(ac_node& a, ac_node& b)
-    {
-        ac_node t;
-        // Raw memory copy
-        memcpy(&t, &a, sizeof(ac_node));
-        memcpy(&a, &b, sizeof(ac_node));
-        memcpy(&b, &t, sizeof(ac_node));
-    }
 };
 class ac_machine
 {
@@ -267,12 +266,6 @@ class ac_machine
         for (size_t i = 0; i < m_child.size();i++)
             patterns[i].sort();
 
-        cout << m_child.size()<<" Nodes\n";
-        int uncompact = 0;
-        for (int i = 0; i < m_child.size(); i++)
-            if(!m_child[i].is_compact())
-                uncompact++;
-        cout << uncompact << " Uncompact\n";
 
         // Trie is ready.
         // Need to solve fail function
@@ -303,12 +296,24 @@ class ac_machine
                 w = x;
                 fail[v] = w;
                 forward_list<int> t(patterns[w]);
-                patterns[v].merge(t);
+                patterns[v].merge(std::move(t));
                 patterns[v].unique();
                 q.push(v);
             };
         }
         cout << "Machine ready\n";
+        cout << m_child.size()<<" Nodes\n";
+        int uncompact = 0;
+        int accept = 0;
+        for (int i = 0; i < m_child.size(); i++)
+        {
+            if (!patterns[i].empty())
+                accept++;
+            if (!m_child[i].is_compact())
+                uncompact++;
+        }
+        cout << uncompact << " Uncompact\n";
+        cout << accept << " accepting\n";
     }
     int root()const
     {
@@ -334,7 +339,7 @@ void aho_corasick_matcher::match(
             v = machine.root();
         else
             v = x;
-        BOOST_FOREACH(int p, machine.patterns[v])
+        for (int p : machine.patterns[v])
         {
             out.push_back(::match(i-patterns[p].size()+1, p));
         }
