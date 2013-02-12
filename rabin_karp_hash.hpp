@@ -7,6 +7,10 @@
 using namespace std;
 const int64_t HASH_MOD=1LL<<31; // Modulo used in rolling hash calculation
 const int64_t HASH_BASE=1103515245; // Number base used in rolling hash calculation
+
+/*
+
+*/
 class rabin_karp_hash {
     public:
         int64_t over;
@@ -31,14 +35,14 @@ class adler_hash {
 int hash_length;
     public:
         static const int64_t initial_hash = 1;
+        static const int mod = 65521;
         adler_hash(int hash_length) {
             this->hash_length=hash_length;
         }
 
         int64_t rolling_hash(int64_t current_hash, int next_character, int prev_character) const {
-            int A = current_hash & 65535;
-            int B = (current_hash >> 16) & 65535;
-            
+            int64_t A = current_hash & 65535;
+            int64_t B = (current_hash >> 16) & 65535;
             if(prev_character != -1) {
                 B =  B + A -(hash_length+1)*prev_character+next_character-1;
                 A = A + next_character - prev_character;
@@ -46,8 +50,9 @@ int hash_length;
                 A += next_character;
                 B += A;
             }
-            A %= HASH_MOD;
-            B %= HASH_MOD;
+            A %= mod;
+            B %= mod;
+            while (B<0) B+=mod;
             return (B<<16) | A;
         }
 
