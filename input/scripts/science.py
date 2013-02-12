@@ -4,7 +4,6 @@ import os
 import re
 
 
-
 def run_script(id):
     args=[ "../../bin/performance","text","pattern",str(id)]
     f = open('temp','w')
@@ -32,6 +31,8 @@ def run_script(id):
             memory = int(m.group(1))
     os.system("rm temp")
     os.system("rm temp2")
+    if time == None:
+        raise mo
     return (time,memory,matches)
 
 def random_test(ids, pattern_length,text_length,pattern_count,alphabet_size=30):
@@ -46,11 +47,13 @@ def random_test(ids, pattern_length,text_length,pattern_count,alphabet_size=30):
     return r
 
 def book_test(ids, textbook, patternbook,text_length, pattern_length, pattern_count):
-    print "%d algo, %d patterncount, %d patternlength, %d textlength" % (id,pattern_count,pattern_length,text_length)
+    print "%d patterncount, %d patternlength, %d textlength" % (pattern_count,pattern_length,text_length)
     os.system("bin/book_patterns %s %d %d > pattern" % (patternbook, pattern_length,pattern_count))
     os.system("cat %s  | cut -c %d- > text" % (textbook,text_length))
     for id in ids:
         r =  run_script(id)
+        print str(id),
+        print r
     os.system("rm pattern")
     os.system("rm text")
     return r
@@ -65,4 +68,5 @@ def run_random():
         for pl in range(3,20,3):
             print "patternlength: %d, patterncount %d" % (pl,pc)
             random_test(ids,pl,1000000,pc,15)
-run_random()
+#run_random()
+run_book()

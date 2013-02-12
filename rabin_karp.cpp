@@ -28,7 +28,7 @@ template <typename T>
 int64_t rabin_karp_matcher<T>::pattern_hash(string pattern, int hash_length) const {
     T hash_function(hash_length);
     int64_t current_hash=hash_function.initial_hash;
-    for(int i=0;i<hash_length;i++) current_hash =  hash_function.rolling_hash(current_hash,pattern[i],-1);
+    for(int i=0;i<hash_length;i++) current_hash =  hash_function.rolling_hash(current_hash,(unsigned char)pattern[i],-1);
     return current_hash;
 }
 
