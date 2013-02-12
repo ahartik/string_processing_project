@@ -46,6 +46,32 @@ def random_test(ids, pattern_length,text_length,pattern_count,alphabet_size=30):
     os.system("rm text")
     return r
 
+def random_test_dist(ids, pattern_distribution,text_length,alphabet_size=30):
+    os.system("rm -f pattern")
+    for (pattern_length,pattern_count) in pattern_distribution:
+        os.system("bin/random_patterns %d % d %d >> pattern" % (pattern_length,pattern_count,alphabet_size))
+    os.system("bin/random_text %d %d > text" % (text_length,alphabet_size))
+    for id in ids:
+        r =  run_script(id)
+        print str(id),
+        print r
+    os.system("rm pattern")
+    os.system("rm text")
+
+    return r
+def book_test_dist(ids, textbook, patternbook,text_length, pattern_distribution):
+    os.system("rm -f pattern")
+    for (pattern_length,pattern_count) in pattern_distribution:
+        os.system("bin/book_patterns %s %d %d >> pattern" % (patternbook, pattern_length,pattern_count))
+#    print "%d patterncount, %d patternlength, %d textlength" % (pattern_count,pattern_length,text_length)
+    os.system("cat %s  | cut -c %d- > text" % (textbook,text_length))
+    for id in ids:
+        r =  run_script(id)
+        print str(id),
+        print r
+    os.system("rm pattern")
+    os.system("rm text")
+    return r
 def book_test(ids, textbook, patternbook,text_length, pattern_length, pattern_count):
     print "%d patterncount, %d patternlength, %d textlength" % (pattern_count,pattern_length,text_length)
     os.system("bin/book_patterns %s %d %d > pattern" % (patternbook, pattern_length,pattern_count))
@@ -70,4 +96,6 @@ def run_random():
             random_test(ids,pl,1000000,pc,15)
 #run_random()
 #run_book()
-book_test(ids,"../musketeers.txt","../robinson.txt",150000,4,14000)
+#book_test(ids,"../musketeers.txt","../robinson.txt",150000,4,14000)
+book_test_dist(ids,"../musketeers.txt","../robinson.txt",150000,[(x,2000) for x in xrange(4,15)])
+#random_test_dist(ids,[(x,2000) for x in xrange(4,15)], 550000,70)
