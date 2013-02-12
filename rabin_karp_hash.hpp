@@ -59,6 +59,7 @@ int hash_length;
             A %= mod;
             B %= mod;
             while (B<0) B+=mod;
+            while (A<0) A+=mod;
             return (B<<16) | A;
         }
 
