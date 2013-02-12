@@ -6,6 +6,7 @@
 #include<vector>
 #include<iostream>
 #include<map>
+#include<forward_list>
 #include<utility>
 using namespace std;
 const int HASH_MOD=65521;
@@ -41,7 +42,7 @@ void rabin_karp_adler_matcher::match(
         match_vector& out) const
 {
     rabin_karp_adler rk;
-    int hash_sizes[]={1,10};
+    int hash_sizes[]={1,6};
     vector<vector<int> > sect_patterns(2);
     for(int i=0;i<orig_patterns.size();i++) {
         bool t=false;
@@ -55,15 +56,15 @@ void rabin_karp_adler_matcher::match(
         if(!t) sect_patterns[sect_patterns.size()-1].push_back(i);
     }
     for(int size=0;size<sect_patterns.size();size++) {
-        vector<vector<pair<uint32_t,int> > > hash_table(TABLE_SIZE);
+        vector<forward_list<pair<uint32_t,int> > > hash_table(TABLE_SIZE);
         vector<int>& patterns = sect_patterns[size];
         if(patterns.size()==0) continue;
-        int hash_length=1<<20; 
+        int hash_length=6;
         for(int i=0;i<patterns.size();i++) hash_length=min(hash_length,(int)orig_patterns[patterns[i]].size());
         cout<<"Hash Length: "<<hash_length<<endl;
         for(int i=0;i<patterns.size();i++) {
             uint32_t hash = rk.pattern_hash(orig_patterns[patterns[i]],hash_length);
-            hash_table[hash%TABLE_SIZE].push_back(make_pair(hash,patterns[i]));
+            hash_table[hash%TABLE_SIZE].push_front(make_pair(hash,patterns[i]));
 
         }
         uint32_t current_a=1;
@@ -86,7 +87,7 @@ void rabin_karp_adler_matcher::match(
             }
             if(i>=hash_length-1) {
                 uint32_t current_hash = (current_b << 16) | current_a;
-                vector<pair<uint32_t,int> >& plist = hash_table[current_hash%TABLE_SIZE];
+                forward_list<pair<uint32_t,int> >& plist = hash_table[current_hash%TABLE_SIZE];
                 bool found=false;
                 for(auto it = plist.begin(); it!=plist.end();it++) {
                     uint32_t hash = it->first;
