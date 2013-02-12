@@ -130,7 +130,7 @@ class ac_node
         single{0,0}
     {
     }
-    ac_node(ac_node&& c) noexcept
+    ac_node(ac_node&& c) 
     {
         memcpy(this, &c, sizeof(ac_node));
         memset(&c, 0 ,sizeof(ac_node));
@@ -339,9 +339,10 @@ void aho_corasick_matcher::match(
             v = machine.root();
         else
             v = x;
+            /*
         for (int p : machine.patterns[v])
         {
             out.push_back(::match(i-patterns[p].size()+1, p));
-        }
+        }*/
     }
 }

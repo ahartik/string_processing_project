@@ -1,6 +1,5 @@
 #pragma once
 #include"match.hpp"
-
 class aho_corasick_matcher : public multiple_matcher
 {
 public:

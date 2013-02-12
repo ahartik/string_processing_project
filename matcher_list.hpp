@@ -4,11 +4,13 @@
 #include"match.hpp"
 #include"aho_corasick.hpp"
 #include"rabin_karp.hpp"
-#include"rabin_karp_adler.hpp"
+#include "rabin_karp_hash.hpp"
+
+extern template class rabin_karp_matcher<rabin_karp_hash>;
 
 static aho_corasick_matcher ac_match;
-static rabin_karp_matcher rk_match;
-static rabin_karp_adler_matcher rka_match;
+static rabin_karp_matcher<rabin_karp_hash> rk_match;
+static rabin_karp_matcher<adler_hash> rka_match;
 
 multiple_matcher* matcher_list[] = 
 {
