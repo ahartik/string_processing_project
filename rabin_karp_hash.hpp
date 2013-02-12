@@ -6,7 +6,6 @@
 #include<iostream>
 using namespace std;
 const int64_t HASH_MOD=1LL<<31; // Modulo used in rolling hash calculation
-const int64_t HASH_BASE=1103515245; // Number base used in rolling hash calculation
 
 /*
 
@@ -14,10 +13,11 @@ const int64_t HASH_BASE=1103515245; // Number base used in rolling hash calculat
 class rabin_karp_hash {
     public:
         int64_t over;
+        static const int64_t base=256; // Number base used in rolling hash calculation
         static const int64_t initial_hash = 0;
         rabin_karp_hash(int hash_length) {
             over=1;
-            for(int i=0;i<hash_length-1;i++) over=(over*HASH_BASE)%HASH_MOD;
+            for(int i=0;i<hash_length-1;i++) over=(over*base)%HASH_MOD;
         }
 
         int64_t rolling_hash(int64_t current_hash, int next_character, int prev_character) const {
@@ -25,7 +25,7 @@ class rabin_karp_hash {
                 current_hash=(current_hash - ((prev_character*over)%HASH_MOD))%HASH_MOD;
                 while(current_hash<0) current_hash += HASH_MOD;
             }
-            current_hash=(current_hash * HASH_BASE)%HASH_MOD;
+            current_hash=(current_hash * base)%HASH_MOD;
             current_hash=(current_hash + next_character)%HASH_MOD;
             return current_hash;
         }

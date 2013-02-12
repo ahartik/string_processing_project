@@ -60,8 +60,8 @@ def book_test(ids, textbook, patternbook,text_length, pattern_length, pattern_co
 ids = [0,1,2]
 def run_book():
     for pc in range(5000,20000,3000):
-        for pl in range(2,20,3):
-            print book_test(ids,"../musketeers.txt","../robinson.txt",50000,pl,pc)
+        for pl in range(4,20,3):
+            book_test(ids,"../musketeers.txt","../robinson.txt",50000,pl,pc)
 
 def run_random():
     for pc in range(5000,20000,3000):
@@ -69,4 +69,5 @@ def run_random():
             print "patternlength: %d, patterncount %d" % (pl,pc)
             random_test(ids,pl,1000000,pc,15)
 #run_random()
-run_book()
+#run_book()
+book_test(ids,"../musketeers.txt","../robinson.txt",150000,4,14000)
