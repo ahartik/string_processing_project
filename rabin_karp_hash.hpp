@@ -30,6 +30,10 @@ class rabin_karp_hash {
             return current_hash;
         }
 
+        std::string name() const
+        {
+            return "Modulo";
+        }
 };
 /*
  Adler-32: hash( T[1..N] ) = B*65536 + A, where
@@ -60,6 +64,11 @@ int hash_length;
             B %= mod;
             while (B<0) B+=mod;
             return (B<<16) | A;
+        }
+
+        std::string name() const
+        {
+            return "Adler";
         }
 
 };
