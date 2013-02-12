@@ -54,7 +54,6 @@ void rabin_karp_matcher<T>::match(
         }
         if(!t) sect_patterns[sect_patterns.size()-1].push_back(i);
     }
-    int a=0,b=0;
     // For each pattern lenght group:
     for(int size=0;size<sect_patterns.size();size++) {
         
@@ -104,15 +103,11 @@ void rabin_karp_matcher<T>::match(
                     int w = it->second;
                     if(check_match(text,orig_patterns[w],i-hash_length+1)) {
                         out.push_back(::match(i-hash_length+1,w));
-                        a++;
-                    } else {
-                        b++;
-                    }
+                    } 
                 }
             }
         }   
     }
-    cout<<a<<" vs "<<b<<endl;
 }
 
 #include "rabin_karp_hash.hpp"
