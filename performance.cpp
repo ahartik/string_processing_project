@@ -65,7 +65,10 @@ int main(int argc, char** argv)
         for(int i=0;i<words.size();i++) patterns.push_back(words[i]);
         cout<<text.length()<<endl;
         cout<<patterns.size()<<endl;
-        if(argc==4) matcher_test=atoi(argv[3]);
+        if(argc==4) {
+        matcher_test=atoi(argv[3]);
+        cout<<"testing "<<matcher_test<<endl;
+        }
     } else {
 
         for (int j = 0; j < M; j++)
