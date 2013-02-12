@@ -60,7 +60,7 @@ void rabin_karp_adler_matcher::match(
         vector<forward_list<pair<uint32_t,int> > > hash_table(TABLE_SIZE);
         vector<int>& patterns = sect_patterns[size];
         if(patterns.size()==0) continue;
-        int hash_length=6;
+        int hash_length=1<<20;
         for(int i=0;i<patterns.size();i++) hash_length=min(hash_length,(int)orig_patterns[patterns[i]].size());
         cout<<"Hash Length: "<<hash_length<<endl;
         for(int i=0;i<patterns.size();i++) {

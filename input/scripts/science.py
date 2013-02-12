@@ -9,7 +9,7 @@ def run_script(id):
     args=[ "../../bin/performance","text","pattern",str(id)]
     f = open('temp','w')
     process = subprocess.Popen(args,stdout=f)
-    memuse = subprocess.Popen(["./memuse.sh", str(process.pid)],stdout=open('temp2','w'))
+    memuse = subprocess.Popen(["./mem.sh", str(process.pid)],stdout=open('temp2','w'))
     process.wait()
     while(True):
         retcode = memuse.poll() #returns None while subprocess is running
