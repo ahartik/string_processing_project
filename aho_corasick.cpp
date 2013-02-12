@@ -6,49 +6,48 @@
 #include<utility>
 #include<iostream>
 #include<stdint.h>
-#include<tr1/unordered_set>
-#include<tr1/unordered_map>
+#include<unordered_set>
+#include<unordered_map>
 #include"aho_corasick.hpp"
 #include<queue>
 #include<cassert>
-#include<tr1/array>
+#include<array>
 
 using namespace std;
 
-class edge
-{
-    public:
-    int to;
-    char c;
-    edge():
-        to(0),
-        c(0)
-    {
-        
-    }
-    edge(char x,int z):
-        to(z),
-        c(x)
-    {
-    }
-    bool operator<(const edge& e)const
-    {
-        return c < e.c;
-    }
-};
-
+/**
+ * Info about Aho-Corasick node.
+ */
 struct ac_node_info
 {
+    // Fail function
     uint32_t fail;
-    uint16_t pad1;
-    char c;
-    unsigned pad2 : 4;
-    bool has_next : 1;
-    bool matches : 1;
-    bool contains : 1;
+    // In compact node next_c is the character with the only edge.
+    char next_c : 8;
+    // First match of this node.
+    unsigned match : 23;
+    // Must be last bit.
+    // Set to one if this node is compact.
+    // This means there there is edge with character next_c to the
+    // node at next index if next_c!=0.
     bool compact : 1;
 };
 
+static const uint32_t NO_MATCH = (1<<23)-1;
+static const uint32_t MAX_NUM_PATTERNS = NO_MATCH-1;
+
+// This is not strictly required, but it's good to know that we are not using
+// accidentally more memory than needed.
+static_assert(sizeof(ac_node_info)==8, "ac_node_info must be 8 bytes in size");
+
+/**
+ * Data structure for trie nodes with multiple children.
+ * 
+ * Data structure contains bitset of 256 bits and a vector of child nodes.
+ * Each char having a child node has bit set to one in the bitset. To find the
+ * corresponding edge we count the number of ones preceding given bit. This
+ * tells us which edge we must take from the edge vector.
+ */
 class trie_array
 {
 private:
@@ -67,6 +66,9 @@ public:
     {
         return edges.size();
     }
+
+    // Functions for iterating all characters.
+    // Used in tree construction.
     char next_char(char last_char)const
     {
         uint8_t x = last_char;
@@ -80,7 +82,6 @@ public:
         x++;
         return skip.next_set(x) != 256;
     }
-
     int get(char c)
     {
         uint8_t uc = c;
@@ -94,7 +95,6 @@ public:
         size_t r = skip.rank(b);
         if(skip[b])
         {
-            edges[skip.rank(b)]=to;
             return;
         }
         skip[b] = 1;
@@ -109,37 +109,34 @@ public:
  *
  * This code depends on the fact that pointers created using operator
  * new will have zeros in their lowest bits. We use the lowest bit
- * to distinguish compact and non-compact nodes.
+ * to distinguish compact and non-compact nodes (compact field in ac_node_info struct).
  * 
  */
 class ac_node
 {
     union
     {
+        // Compact node representation.
+        // If single.compact==0 the node info is found from many.arr->info
         ac_node_info single;
+        // Array node representation.
         struct 
         {
-            char pad[sizeof(single)-sizeof(trie_array*)];
             trie_array* arr;
         } many;
     };
 
-    char compact_c() const
-    {
-        return single.c;
-    }
     bool empty() const
     {
-        return is_compact() && !single.has_next;
+        return is_compact() && single.next_c == 0;
     }
     public:
+    // Initially node has no children
     ac_node()
     {
         single.fail = 0;
-        single.c = 0;
-        single.has_next = 0;
-        single.matches = 0;
-        single.contains = 0;
+        single.next_c = 0;
+        single.match = NO_MATCH;
         single.compact = 1;
     }
     ac_node(ac_node&& c)
@@ -163,26 +160,27 @@ class ac_node
     int count() const
     {
         if (is_compact()) {
-            return single.has_next;
+            return single.next_c != 0 ? 1 : 0;
         }
-        if (many.arr==NULL)
-            return 0;
         return many.arr->edge_count();
     }
 
     void add(int thiz, char c, int n)
     {
-        if (empty() && n == thiz + 1)
+        // Null character always creates array.
+        // This way we get correct behaviour
+        // as node is considered empty if next_c == 0.
+        if (empty() && n == thiz + 1 && c != 0)
         {
-            single.c = c;
-            single.has_next = 1;
+            single.next_c = c;
             return;
         }
-        else if (is_compact() && single.has_next)
+        else if (is_compact() && single.next_c != 0)
         {
-            char oc = compact_c();
+            char oc = single.next_c;
             assert(oc != c);
             int oto = thiz + 1;
+            single.compact = false;
             ac_node_info info = single;
             many.arr = new trie_array();
             many.arr->add(oc, oto);
@@ -190,6 +188,7 @@ class ac_node
         }
         else if(is_compact())
         {
+            single.compact = false;
             ac_node_info info = single;
             many.arr = new trie_array();
             many.arr->info = info;
@@ -202,7 +201,7 @@ class ac_node
         if (empty()) return -1;
         if(is_compact())
         {
-            if(c==compact_c())
+            if(c==single.next_c)
                 return thiz+1;
 
             return -1;
@@ -213,12 +212,12 @@ class ac_node
     {
         if (empty())return 0;
         if (is_compact())
-            return compact_c();
+            return single.next_c;
         return many.arr->first_char();
     }
     char next_char(char last_char)const
     {
-        if (empty() || is_compact()) return 0;
+        if (is_compact()) return 0;
         return many.arr->next_char(last_char);
     }
 
@@ -241,42 +240,41 @@ class ac_node
     }
 };
 
+/**
+ * Implementation of construction algorithm.
+ *
+ */
 class ac_machine
 {
-    vector<ac_node> m_child;
-    
-    int n() const
-    {
-        return m_child.size();
-    }
+    vector<ac_node> nodes;
     public:
-    vector<pair<int,int>> patterns;
+    // Linked list of match dependencies.
+    // If node n matches pattern i it also matches pattern next_match[i].
+    // Zero is used as special value to mark end of matches.
+    vector<uint32_t> next_match;
     void set_child(int node, char c, int next)
     {
-        return m_child[node].add(node, c, next);
+        return nodes[node].add(node, c, next);
     }
     int get_child(int node, char c)
     {
-        return m_child[node].get(node, c);
-    }
-    bool has_child(int node, char c)
-    {
-        return get_child(node, c) != -1;
+        return nodes[node].get(node, c);
     }
     int add_node()
     {
-        m_child.push_back(ac_node());
-        return n()-1;
+        nodes.push_back(ac_node());
+        return nodes.size()-1;
     }
     int fail(int n) const
     {
-        return m_child[n].info().fail;
+        return nodes[n].info().fail;
     }
     
     ac_machine(const vector<string>& pats)
     {
         int fallback = add_node();
         int root = add_node();
+        next_match.resize(pats.size());
         
         for (size_t i = 0; i < pats.size(); i++)
         {
@@ -296,27 +294,28 @@ class ac_machine
                 v = u;
                 j++;
             }
-            m_child[v].info().matches = 1;
-            m_child[v].info().contains = 1;
-            patterns.emplace_back(v,i);
+
+            int old_match = nodes[v].info().match;
+            int new_match = i;
+            nodes[v].info().match = new_match;
+            next_match[new_match] = old_match;
         }
 
-        std::sort(patterns.begin(), patterns.end());
-        
         // Trie is ready.
         // Need to solve fail function
+        // and match links.
         queue<int> q;
         q.push(root);
-        m_child[fallback].info().fail = fallback;
-        m_child[root].info().fail = fallback;
+        nodes[fallback].info().fail = fallback;
+        nodes[root].info().fail = fallback;
         while (q.size() != 0)
         {
             int u = q.front();
             q.pop();
-            char c=m_child[u].first_char();
+            char c=nodes[u].first_char();
 
-            for(int j=0;j<m_child[u].count();j++,
-                c=m_child[u].next_char(c))
+            for(int j=0;j<nodes[u].count();j++,
+                c=nodes[u].next_char(c))
             {
                 int v = get_child(u,c);
                 int w = fail(u);
@@ -331,33 +330,53 @@ class ac_machine
                     }
                 }
                 w = x;
-                assert(m_child[v].info().fail == 0);
-                m_child[v].info().fail = w;
-                m_child[v].info().matches |= m_child[w].info().matches;
+                // We only visit each node once
+                assert(nodes[v].info().fail == 0);
+                nodes[v].info().fail = w;
+
+                // Fix matchlists:
+                // Searches for the end of links to add
+                // matches from the fail-node w.
+                int first = nodes[v].info().match; 
+                int mv = first;
+                int mw = nodes[w].info().match;
+                if (mv == NO_MATCH)
+                {
+                    nodes[v].info().match = mw;
+                }
+                else
+                {
+                    while(next_match[mv]!=NO_MATCH)
+                        mv = next_match[mv];
+                    next_match[mv] = mw;
+                }
+                
                 q.push(v);
             };
         }
         cout << "Machine ready\n";
-        cout << m_child.size() << " Nodes\n";
+        cout << nodes.size() << " Nodes\n";
         int uncompact = 0;
         int accept = 0;
-        for (size_t i = 0; i < m_child.size(); i++)
+        for (size_t i = 0; i < nodes.size(); i++)
         {
             if (matches(i))
                 accept++;
-            if (!m_child[i].is_compact())
+            if (!nodes[i].is_compact())
                 uncompact++;
         }
         cout << uncompact << " Uncompact\n";
         cout << accept << " accepting\n";
+        cout << pats.size() << " patterns\n";
     }
-    bool contains_match(int v) const
-    {
-        return m_child[v].info().contains;
-    }
+
     bool matches(int v) const
     {
-        return m_child[v].info().matches;
+        return nodes[v].info().match!=0;
+    }
+    int match(int v) const
+    {
+        return nodes[v].info().match;
     }
     int root()const
     {
@@ -385,21 +404,14 @@ void aho_corasick_matcher::match(
             v = x;
         x = v;
 
-        const vector<pair<int,int> > &pv = machine.patterns;
-        while (machine.matches(x))
+        uint32_t y = machine.match(x);
+        int mc = 0;
+        while (y!=NO_MATCH)
         {
-            if (machine.contains_match(x))
-            {
-                pair<int, int> l(x,0);
-                for (auto it = std::lower_bound(pv.begin(), pv.end(), l);
-                     it != pv.end() && it->first == x;
-                     ++it)
-                {
-                    int p = it->second;
-                    out.push_back(::match(i-patterns[p].size()+1, p));
-                }
-            }
-            x = machine.fail(x);
+            int p = y;
+            out.push_back(::match(i-patterns[p].size()+1, p));
+            y = machine.next_match[y];
+            mc++;
         }
     }
 }
