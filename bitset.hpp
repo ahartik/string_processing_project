@@ -5,6 +5,15 @@
 #include <ostream>
 #include <utility>
 
+// Implementation of constant sized bitset similar to
+// std::bitset.
+//
+// Important additions to std::bitset :
+// -rank(bit)
+//  returns the number of set bits preceding given bit.
+// -next_set(bit)
+//  returns the next set bit following given bit.
+//
 
 template<size_t Size>
 class bitset
@@ -12,10 +21,15 @@ class bitset
     static const size_t WordCount = (Size+63)/64;
     uint64_t words[WordCount];
 
+    // Shorter name for gcc's builtin popcount.
+    // This should be compiled to machine instruction
+    // 'popcnt' if sse4 is available.
     static int popcnt(uint64_t x)
     {
         return __builtin_popcountll(x);
     }
+    // Rank operation in one word.
+    // Return number of bits preceding given bit.
     static size_t bitrank(uint64_t x, size_t bit)
     {
         uint64_t mask = ((1ULL<<bit)-1);
@@ -24,9 +38,11 @@ class bitset
     public:
     bitset()
     {
-        memset(words, 0 , sizeof(words));
+        memset(words, 0, sizeof(words));
     }
     
+    // Reference class so we can have api to
+    // std::bitset
     class reference
     {
         uint64_t* word;
@@ -85,8 +101,8 @@ class bitset
             mask = -1ULL;
             if (m)
             {
-                int f = ffsll(m);
-                return w*64+f-1;
+                int f = __builtin_ctzll(m);
+                return w*64+f;
             }
         }
         return Size;

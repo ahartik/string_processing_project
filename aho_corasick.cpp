@@ -1,17 +1,12 @@
 #include"match.hpp"
-#include<list>
-#include<forward_list>
 #include<algorithm>
 #include"bitset.hpp"
 #include<utility>
 #include<iostream>
 #include<stdint.h>
-#include<unordered_set>
-#include<unordered_map>
 #include"aho_corasick.hpp"
 #include<queue>
 #include<cassert>
-#include<array>
 
 /**
  * Implementation of Aho-Corasick multiple pattern matching algorithm.
@@ -304,10 +299,10 @@ struct ac_machine
 
         next_match.resize(pats.size());
         assert(pats.size() <= MAX_NUM_PATTERNS);
-        // This is the maximum number of nodes we need
-        int total = 0;
+        // This is the maximum number of nodes we will need
+        int total = 2;
         for (size_t i = 0; i < pats.size(); i++)
-            total += pats[i].size() + 1;
+            total += pats[i].size();
 
         nodes.reserve(total);
 

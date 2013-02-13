@@ -1,13 +1,19 @@
 #include"matcher_list.hpp"
-#include"timef.h"
 #include<cstdlib>
 #include<string>
 #include<iostream>
 #include "util.hpp"
 #include<set>
+#include<time.h>
+
 using namespace std;
+
 vector<string> patterns;
 string text;
+
+static double timef() {
+    return clock() / (double)CLOCKS_PER_SEC;
+}
 
 void matcher_time(const multiple_matcher* m)
 {
@@ -32,8 +38,13 @@ int main(int argc, char** argv)
         text = read_text(argv[1]);
         patterns = read_words(argv[2]);
 
-        cout<<text.length()<<endl;
-        cout<<patterns.size()<<endl;
+        cout<<"Text length: "<<text.length()<<endl;
+        cout<<"Number of patterns: "<<patterns.size()<<endl;
+        int total = 0;
+        for(int i = 0; i< patterns.size(); i++)
+            total+=patterns[i].size();
+        cout<<"Total pattern length: " << total <<"\n";
+
         if(argc==4) {
             matcher_test=atoi(argv[3]);
             cout << "testing only algorithm '" <<
