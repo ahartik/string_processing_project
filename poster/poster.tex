@@ -124,7 +124,7 @@ J\begin{textblock}{95}(95,-38.5)
 % If you need two lines for the title, you need to adjust the position of this block and textblockorigin
 % Remember, two first words use faculty colour. If your title is long, you can use small letters.
 \begin{textblock}{190}(0,-13.5)
-{\sffamily\LARGE{{\color{sciorange}AHO-CORASICK \color{unigray}AND RABIN-KARP IN MULTIPLE PATTERN MATCHING}}}
+{\sffamily\LARGE{{\color{sciorange}AHO-CORASICK AND RABIN-KARP\color{unigray} IN MULTIPLE PATTERN MATCHING}}}
 \small\hfill Aleksi Hartikainen and Jussi Kokkala\\ % If you have multiple authors, their names can be on the same line. Adjust font size as necessary
 \rule[2mm]{190mm}{0.3pt} % This is the line under the title, adjust the last parameter if it seems to be in the wrong place
 \end{textblock}
@@ -146,12 +146,12 @@ decompression phase with respect to both space and time.
   one, and cover the whole space-time tradeoff spectrum in between.
 \end{textblock}
 
-% Large subtitle with line. Again, not from the university template.
-%\begin{textblock}{190}(0,25)
-%\sffamily
-%\Large{\color{sciorange}ARITHMETIZATION}\small\\
-%\rule[3mm]{190mm}{0.3pt}
-%\end{textblock} 
+ %Large subtitle with line. Again, not from the university template.
+\begin{textblock}{190}(0,25)
+\sffamily
+\Large{\color{sciorange}ALGORITHMS}\small\\
+\rule[3mm]{190mm}{0.1pt}
+\end{textblock} 
 
 % ---------------------------- INTRO ----------------------------------
 % Three-column stuff
@@ -159,73 +159,15 @@ decompression phase with respect to both space and time.
 % The vertical size of the columns depends on the content, so unfortunately you have to manually move contents around
 
 % First column
-\begin{textblock}{60}(0,20)
-  {\sffamily\normalsize{\color{sciorange}BURROWS--WHEELER
-      TRANSFORM}}\vspace{1mm}\\ % Titles among the main text are made like this, not by using \section
-  \footnotesize 
-The Burrows--Wheeler transform (BWT) is an invertible text transform
-defined as follows.\vspace{3mm}
-
-{\scriptsize\sffamily
-\quad{\bf Input: } text $T={}$BANANA\eos
-\vspace{2mm}
-
-\tabcolsep=.25em
-\quad\begin{minipage}[t]{26mm}
-\raggedright
-%\centering
-  1. Build a matrix with the text \emph{rotations} as rows
-\begin{center}
-\sffamily
-    \begin{tabular}{ccccccc}
- %   \multicolumn{1}{c}{$F$} &&&&&\multicolumn{1}{c}{}& \multicolumn{1}{c}{}\\
-    B&A&N&A&N&A&\eos\\
-    A&N&A&N&A&\eos&B\\
-    N&A&N&A&\eos&B&A\\
-    A&N&A&\eos&B&A&N\\
-    N&A&\eos&B&A&N&A\\
-    A&\eos&B&A&N&A&N\\
-    \eos&B&A&N&A&N&A\\
-  \end{tabular}
-  \end{center}
-\end{minipage}
-% \parbox[t]{6mm}{\centering \mbox{}\\\rule{0pt}{20mm}
-% $\overset{\textrm{sort}}{\Rightarrow}$
-% }%
-\hfill
-\begin{minipage}[t]{28mm}
-\centering 2. Sort the rows
-\begin{center}
-\sffamily
-    \begin{tabular}{|c|ccccc|c|}
-    \multicolumn{1}{c}{$F$} &&&&&\multicolumn{1}{c}{}& \multicolumn{1}{c}{$L$}\\
-    \cline{1-1}\cline{7-7}
-    \eos&B&A&N&A&N&A\\
-    A&\eos&B&A&N&A&N\\
-    A&N&A&\eos&B&A&N\\
-    A&N&A&N&A&\eos&B\\
-    B&A&N&A&N&A&\eos\\
-    N&A&\eos&B&A&N&A\\
-    N&A&N&A&\eos&B&A\\
-    \cline{1-1}\cline{7-7}
-  \end{tabular}
-\end{center}
-\end{minipage}
-\vspace{2mm}
-
-\quad{\bf Output: } BWT $L={}$ANNB\eos AA (the last column)
-\vspace{3mm}
-}
-
-\footnotesize The properties of the BWT make it easier to
-compress than the original text. It is used as the first stage in many
-compression programs including the widely used bzip2 (thus the b).
-
+\begin{textblock}{60}(0,32)
+  {\sffamily\normalsize{\color{sciorange}AHO--CORASICK
+      }}\vspace{1mm}\\ % Titles among the main text are made like this, not by using \section
+Lorem ipsum
 \end{textblock} 
 
 % Second column
-\begin{textblock}{60}(65,20)
-  {\sffamily\normalsize{\color{sciorange}INVERSE BWT}}\vspace{1mm}\\
+\begin{textblock}{60}(65,32)
+  {\sffamily\normalsize{\color{sciorange}RABIN--KARP}}\vspace{1mm}\\
   \footnotesize 
   Define
   $
@@ -261,11 +203,12 @@ i \mapsto C[L[i]]+\rank(i)
 \end{textblock}
 
 
-% ----------------------- ALGORITHMS ----------------------------
+% ----------------------- EXPERIMENTS ----------------------------
 
-\begin{textblock}{125}(0,97)
-\sffamily\normalsize{\color{sciorange}NEW ALGORITHMS FOR INVERSE BWT}\small\\
-\rule[3mm]{125mm}{0.1pt}
+\begin{textblock}{190}(0,97)
+\sffamily
+\Large{\color{sciorange}EXPERIMENTAL RESULTS}\small\\
+\rule[3mm]{190mm}{0.1pt}
 \end{textblock} 
 
 
@@ -389,28 +332,6 @@ i \mapsto C[L[i]]+\rank(i)
   We combine wavelet trees with reference point
   ranks, obtaining the \emph{most space-efficient} algorithm.
 \end{textblock} 
-	
-%---------------------- RIGHT COLUMN ------------------------------
-% Third column
-\begin{textblock}{60}(130,20)
-  {\sffamily\normalsize{\color{sciorange}
-      EXPERIMENTAL RESULTS}}\vspace{1mm}\\
-  \footnotesize 
-  The graphs below show the time and space requirements of several
-  algorithms on two texts.  The algorithms are divided
-  into three groups:
-  \begin{description}
-  \item[\color{new}New] algorithms based on reference point ranks, repetition
-    shortcuts and wavelet trees
-  \item[\color{improved}Improved] implementations of wavelet trees and
-    algorithms from~\cite{ll2005}
-  \item[\color{prior}Prior] algorithms from~\cite{s2001,ll2005}
-  \end{description}
-  \vspace{2mm}
-
-  \vspace{2mm}
-
-\end{textblock}
 
 %\begin{textblock}{60}(130,165)
 %  {\sffamily\normalsize{\color{sciorange}CONCLUDING REMARKS}}\vspace{1mm}\\

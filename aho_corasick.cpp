@@ -403,7 +403,7 @@ struct ac_machine
 
 void aho_corasick_matcher::match(
         const std::string& text,
-        const std::vector<std::string> patterns,
+        const std::vector<std::string>& patterns,
         match_vector& out) const
 {
     ac_machine machine(patterns);

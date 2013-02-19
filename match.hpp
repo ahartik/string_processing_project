@@ -28,7 +28,7 @@ class multiple_matcher
 {
 public:
     virtual void match(const std::string& s,
-                       const std::vector<std::string> patterns,
+                       const std::vector<std::string>& patterns,
                        match_vector& out) const = 0;
     virtual std::string name() const = 0;
     virtual ~multiple_matcher()

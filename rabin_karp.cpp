@@ -35,7 +35,7 @@ int64_t rabin_karp_matcher<T>::pattern_hash(string pattern, int hash_length) con
 template <typename T>
 void rabin_karp_matcher<T>::match(
         const string& text,
-        const vector<string> orig_patterns,
+        const vector<string>& orig_patterns,
         match_vector& out) const
 {
 
