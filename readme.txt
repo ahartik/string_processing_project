@@ -25,9 +25,9 @@ Compile:
 
 Running:
  Sanity test:
- -   bin/test
+    bin/test
  Performance test:
- -   bin/performance [text_file] [pattern_file] [algorithm #]
- - examples:
-     - bin/performance input/robinson_book.txt input/musketeers_patterns.txt
-     - bin/performance input/musketeers_book.txt input/robinson_patterns.txt
+    bin/performance [text_file] [pattern_file] [algorithm #]
+  -examples:
+    bin/performance input/robinson_book.txt input/musketeers_patterns.txt
+    bin/performance input/musketeers_book.txt input/robinson_patterns.txt

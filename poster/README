@@ -1,0 +1,14 @@
+To compile this poster:
+
+1. Get the tool "poster" from
+ftp://ftp.es.ele.tue.nl/pub/users/jos/poster/
+Compile it with "make" and place the executable "poster"
+in this directory.
+
+2. Run the script "./make_poster"
+
+This produces the file "poster_ibwt_A4.pdf", which 
+contains the poster split into 16 A4s.
+
+See "make_poster" and "poster_ibwt.tex" for additional 
+details.
