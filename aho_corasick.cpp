@@ -1,27 +1,26 @@
 #include"match.hpp"
-#include<list>
-#include<forward_list>
 #include<algorithm>
 #include"bitset.hpp"
 #include<utility>
 #include<iostream>
 #include<stdint.h>
-#include<unordered_set>
-#include<unordered_map>
 #include"aho_corasick.hpp"
 #include<queue>
 #include<cassert>
-#include<array>
-
-using namespace std;
 
 /**
+ * Implementation of Aho-Corasick multiple pattern matching algorithm.
+ *
+ *
  * About portability:
  * This code has only been tested on linux, x86_64 and gcc, but *should*
  * also work on 32bit x86 platforms.
  *
  * This most probably won't work on big-endian platforms.
  */
+
+using namespace std;
+
 
 /**
  * Info about Aho-Corasick node.
@@ -43,7 +42,7 @@ struct ac_node_info
     // This is the case on current gcc,
     // but not necessarily on other compilers.
     //
-    // Is the node compact?
+    // Is this node compact?
     bool compact : 1;
 };
 
@@ -55,9 +54,9 @@ static const uint32_t NO_MATCH = (1<<23)-1;
 static const uint32_t MAX_NUM_PATTERNS = NO_MATCH-1;
 
 /**
- * Data structure for trie nodes with multiple transitions.
+ * Data structure for aho-corasick nodes with multiple transitions.
  *
- * Data structure contains bitset of 256 bits and a vector of transition nodes.
+ * trie_array contains bitset of 256 bits and a vector of transition nodes.
  * Each char having a transition has bit set to one in the bitset.
  *
  * To find the corresponding transition we count the number of ones preceding
@@ -189,8 +188,7 @@ class ac_node
      */
     void add(int thiz, char c, int n)
     {
-        // If pattern contains null byte we have
-        // to create trie_array as we denote empty nodes
+        // If c==0 we have to create trie_array because we mark empty nodes
         // with next_c = 0
         if (empty() && n == thiz + 1 && c != 0)
         {
@@ -259,19 +257,23 @@ class ac_node
 
 /**
  * Implementation of construction algorithm.
- *
  */
-class ac_machine
+struct ac_machine
 {
     // Vector of all nodes of this machine.
     // Compact nodes will be placed in consecutively so
     // we don't need to store their transition destinations.
     vector<ac_node> nodes;
-    public:
     // Linked list of match dependencies.
     // If node n matches pattern i it also matches pattern next_match[i].
     // Zero is used as special value to mark end of matches.
     vector<uint32_t> next_match;
+
+    // index of root node
+    int root;
+    // index of fallback node
+    // fail(root) = fallback
+    int fallback;
     void set_trans(int node, char c, int next)
     {
         return nodes[node].add(node, c, next);
@@ -292,14 +294,15 @@ class ac_machine
     }
     ac_machine(const vector<string>& pats)
     {
-        int fallback = add_node();
-        int root = add_node();
+        fallback = add_node();
+        root = add_node();
+
         next_match.resize(pats.size());
         assert(pats.size() <= MAX_NUM_PATTERNS);
-        // This is the maximum number of nodes we need
-        int total = 0;
+        // This is the maximum number of nodes we will need
+        int total = 2;
         for (size_t i = 0; i < pats.size(); i++)
-            total += pats[i].size() + 1;
+            total += pats[i].size();
 
         nodes.reserve(total);
 
@@ -384,11 +387,8 @@ class ac_machine
         cout << "Machine ready\n";
         cout << nodes.size() << " nodes\n";
         int uncompact = 0;
-        int accept = 0;
         for (size_t i = 0; i < nodes.size(); i++)
         {
-            if (match(i) != NO_MATCH)
-                accept++;
             if (!nodes[i].is_compact())
                 uncompact++;
         }
@@ -399,14 +399,6 @@ class ac_machine
     {
         return nodes[v].info().match;
     }
-    int root()
-    {
-        return 1;
-    }
-    int fallback()
-    {
-        return 0;
-    }
 };
 
 void aho_corasick_matcher::match(
@@ -415,19 +407,19 @@ void aho_corasick_matcher::match(
         match_vector& out) const
 {
     ac_machine machine(patterns);
-    int v = machine.root();
+    int v = machine.root;
 
     for (size_t i = 0; i < text.size(); i++)
     {
         char c = text[i];
         int x;
-        while (v!=machine.fallback() &&
+        while (v!=machine.fallback &&
                ((x=machine.get_trans(v,c))==-1))
             v = machine.fail(v);
 
         // From fallback node we always get back to the root node
-        if (v == machine.fallback())
-            v = machine.root();
+        if (v == machine.fallback)
+            v = machine.root;
         else
             v = x;
         x = v;
