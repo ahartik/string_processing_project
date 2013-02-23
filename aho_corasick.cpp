@@ -383,6 +383,7 @@ struct ac_machine
                 q.push(v);
             };
         }
+#if 0
 
         cout << "Machine ready\n";
         cout << nodes.size() << " nodes\n";
@@ -393,6 +394,7 @@ struct ac_machine
                 uncompact++;
         }
         cout << uncompact << " large nodes\n";
+#endif
     }
 
     int match(int v)
@@ -433,4 +435,32 @@ void aho_corasick_matcher::match(
             y = machine.next_match[y];
         }
     }
+}
+void aho_corasick_matcher::print_dot(const std::vector<std::string>& patterns)
+{
+    ac_machine machine(patterns);
+    cout << "digraph {\n";
+    vector<string> names(machine.nodes.size());
+    for (int i = 1; i < machine.nodes.size(); i++)
+    {
+        ac_node& n = machine.nodes[i];
+        char c = n.first_char();
+        for (int j=0;j<n.count();j++)
+        {
+            int t = n.get(i, c);
+            names[t] = names[i];
+            names[t].push_back(c);
+            cout << "n"<<i<<" -> "<<"n"<<t<<" [label=\""<<c<<"\"]\n";
+            c = n.next_char(c);
+        }
+        
+        cout << "n"<<i<<" -> "<<"n"<<machine.fail(i)<<" [style=dashed, constraint=false]\n";
+    }
+    names[0] = "_|_";
+    for (int i = 0; i < machine.nodes.size(); i++)
+    {
+        cout << "n"<<i<<" [label=\""<<names[i]<<"\"]\n";
+    }
+    cout << "n0 -> n1 [label=\"*\",constraint=false]\n";
+    cout << "}\n";
 }
