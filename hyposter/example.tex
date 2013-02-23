@@ -40,10 +40,9 @@
 \usetheme[mat, threecolumn]{HYposter}
 
 % Set up the title and author info
-\titlestart{Pretty Posters With \LaTeX}
-\titleend{Using the HYposter Style}
-\author{Olli Wilkman$^1$}
-\institute{$^1$Department of Physics, \url{olli.wilkman@iki.fi}}
+\titlestart{Aho-Corasick and Rabin-Karp}
+\titleend{in Multiple Pattern String Matching}
+\author{Aleksi Hartikainen and Jussi Kokkala}
 \leftcorner{}
 
 \begin{document}
@@ -51,42 +50,28 @@
 
 \newcolumn
 
-\section{\LaTeX~posters made easier}
-The \texttt{HYposter} style enables you to make scientific posters with a University of Helsinki look using  the \texttt{beamerposter} package for \LaTeX. 
+%\section{\LaTeX~posters made easier}
+Multiple pattern string matching is ...
 
-The official poster templates for the university are available only for Microsoft PowerPoint and Adobe InDesign, expensive pieces of software which are not easily available. \LaTeX, on the other hand, is free and works on almost all commonly used computer systems. It also has superior capabilities in typesetting mathematical formulas, which makes it popular among scientists.
+Aho --
 
+\section{Rabin-Karp}
+      Rabin-Karp uses hashing to find fixed length patterns in a text. The hashing function used is a rolling hash, meaning that the hash of $T[2\;..\;N+1]$ can be calculated from the hash of $T[1..N]$ in constant time. 
+     
+If the hash values of $T[i\;..\;N+i]$ and a pattern prefix of length N, the algorithm checks if the pattern occurs at text index $i$.
 
-\section{The look}
-The university has two poster styles, that silly one with the gigantic logo and header taking up a third of the page, and the tighter one. This poster style tries to emulate the second one. Though it does not exactly conform to the official poster style of the university, but it tries to do a good enough job. 
-
-The background of the poster is white and the text is black. The block headings are in the faculty colour. The first line of the poster title is in the faculty colour and the rest in neutral grey. In the lower right corner the name of the university is set in neutral grey and the faculty name in the faculty colour.
-Some space for things such as logos of cooperating or supporting institutes is provided in the lower left.
-
-The layout of the official poster and this example is three-column, but you can also use two columns.
-
-It is not possible to use the university's official fonts, not least because of the rather strict license they come under. However, the sans-serif font used here is a reasonable replacement.
+    For $P$ patterns of combined length $m$  and a text of length $n$, the average running time of Rabin-Karp is $O(n+m)$ in space $O(P)$.
 
 
-\section{Using the package}
-\texttt{HYposter} is a style definition for \texttt{beamerposter}, which itself is a package that uses the \texttt{beamer} document class to produce posters. This means you need both \texttt{beamer} and \texttt{beamerposter} in order it to work. Most modern \LaTeX~distributions already come with \texttt{beamer}, and installing the rest is not a problem.
-
-Note that due to some radical redesigns, this style is not compatible with any other \texttt{beamerposter} style, that is, if you write a poster using this style, you cannot simply change the style to another one.
-
-See the \texttt{README} and \texttt{INSTALL} files for more details about installation and usage of the package (though they assume a basic knowledge of \LaTeX).
-
-
-
+\section{Aho-Corasick}
 
 \newcolumn
-
-\section{Versatility}
-This is the cool part: the poster supports \emph{all} of the university's different colour themes. It also automatically changes the name of the faculty or department in the lower right corner. Everything happens under the hood, and the user does not need to worry about the appearance of the poster at all, only the contents.
+\section{Experiments}
 
 The style supports all of the university's different faculties and special departments which have an official colour scheme.
 
 
-\section{The colour options}
+\section{Conclusions}
 
 The colour scheme of the following faculties and departments is supported. This is a comprehensive list of all the official color schemes defined for our university.
 
