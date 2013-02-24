@@ -95,10 +95,12 @@ For $P$ patterns of combined length $m$  and a text of length $n$, the average r
 Aho-Corasick constructs an automaton (Figure \ref{fig:ac_machine}) which is then computed on the text.
 States of this automaton are the nodes of a trie of all patterns strings.
 Additionally there are failure links for each state (Dotted edges in figure~\ref{fig:ac_machine}).
-, which are followed until matching transition is found.
+, which are followed until matching transition is found. From the root state all failing symbols
+have self-transitions.
 
 %Running time of the algorithm is linear in the length of text. Each failure link goes towards the root, so in total we can't use more failure
 %links than we do transitions.
+%Additional ``back'' state is added to the automaton to make root node behave similarly to all other nodes. 
 
 The failure links are computed using algorithm~\ref{alg:ac_fail}.
 Pattern links (shown green in figure~\ref{fig:ac_machine}) are added to each
@@ -107,6 +109,11 @@ is a suffix of $s$.
 Using these links we can easily list all matching patterns for
 any state.
 \newcolumn
+
+Construction algorithm has time and space complexity $O(M)$. Total time complexity is $O(N+M)$.
+
+Main disadvantage of Aho-Corasick algorithm is its memory requirements.
+Our implementation uses $8M+O(P)$ bytes of space.
 
 \vspace{5mm}
 
@@ -118,7 +125,7 @@ any state.
 \begin{algorithmic}[1]
 \Require{Trie of patterns}
 \Ensure{Failure links for all nodes}
-\State $ \text{fail}(\text{root}) \gets \text{back}$
+\State $ \text{fail}(\text{root}) \gets \text{fail}$
 \State $Q \gets Queue\{\text{root}\}$
 \While {$Q \neq \emptyset$}
     \State $v \gets \text{dequeue}(Q) $
