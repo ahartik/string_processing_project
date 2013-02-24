@@ -58,8 +58,20 @@ Multiple pattern string matching is ...
 Aho --
 
 \section{Rabin-Karp}
-      Rabin-Karp uses hashing to find fixed length patterns in a text. The hashing function used is a rolling hash, meaning that the hash of $T[2\;..\;N+1]$ can be calculated from the hash of $T[1..N]$ in constant time. Rabin-Karp in single pattern matching is shown in algorithm \ref{alg:rk_single}.
-
+      Rabin-Karp uses hashing to find fixed length patterns in a text. The hashing function used is a rolling hash, meaning that the hash of $T[2\;..\;N+1]$ can be calculated from the hash of $T[1..N]$ in constant time.  The most commonly used hash function interprets each substring $T[a\;..\;a+N)$ as an $N$ digit number:
+      \vspace{-18mm}
+\begin{figure}[H]
+\small
+\label{fig:hash}
+\begin{equation*}
+H_a = \text{hash(T[a\;..\;a+N)\;)} = \sum_{j=a}^{a+N-1}(T[j] \times B^{a+N-j-1})
+\end{equation*}
+      \vspace{-4mm}
+\begin{equation*}
+H_{a+1} = (H_a - T[a]\times B^{N}) \times B + T[a+N] 
+\end{equation*}
+\end{figure}
+\vspace{10mm}
 \begin{algorithm} [H]
 \small
 \caption{Single pattern Rabin-Karp}
@@ -83,7 +95,7 @@ Aho --
 \end{algorithmic}
 \end{algorithm}
 
-If the pattern length is fixed, multiple pattern Rabin-Karp can be modified from algorithm \ref{alg:rk_single} by storing all pattern hashes in a hash table and checking every text position against all patterns in the hash table at index $text\_hash$.
+If the pattern length is fixed, multiple pattern Rabin-Karp can be modified from algorithm (\ref{alg:rk_single}) by simply storing all pattern hashes in a hash table and checking every text position against each pattern in the hash table at index $text\_hash$.
 
 If the pattern length is not fixed, it is possible to use fixed length Rabin-Karp separately for each pattern length. Another solution is to use the length $L$ of the shortest pattern, and calculate hashes only up to the $L$th character of each pattern. As this increases the number of false alarms, in practice it is often better to combine these methods and divide the patterns into several groups of similar lengths.
 
@@ -98,6 +110,7 @@ Additionally there are failure links for each state (Dotted edges in Figure~\ref
 , which are followed until matching transition is found. From the root state all failing symbols
 have self-transitions.
 
+\newcolumn
 %Running time of the algorithm is linear in the length of text. Each failure link goes towards the root, so in total we can't use more failure
 %links than we do transitions.
 %Additional ``back'' state is added to the automaton to make root node behave similarly to all other nodes. 
@@ -108,7 +121,6 @@ matching state and from each pattern $s$ there is a link to the longest pattern 
 is a suffix of $s$.
 Using these links we can easily list all matching patterns for
 any state.
-\newcolumn
 
 Construction algorithm has time complexity $O(M)$. Total time complexity is $O(N+M)$.
 
