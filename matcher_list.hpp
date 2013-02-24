@@ -5,6 +5,7 @@
 #include"aho_corasick.hpp"
 #include"rabin_karp.hpp"
 #include "rabin_karp_hash.hpp"
+#include<string>
 
 extern template class rabin_karp_matcher<rabin_karp_hash>;
 
@@ -17,6 +18,12 @@ multiple_matcher* matcher_list[] =
     &ac_match,
     &rk_match,
     &rka_match,
+};
+std::string short_name[] =
+{
+    "ac",
+    "rk",
+    "rka"
 };
 
 const int matcher_list_size = sizeof(matcher_list) /

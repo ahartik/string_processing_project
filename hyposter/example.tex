@@ -92,9 +92,9 @@ For $P$ patterns of combined length $M$  and a text of length $N$, the average r
 
 \section{Aho-Corasick}
 
-Aho-Corasick constructs an automaton (Figure \ref{fig:ac_machine}) which is then computed on the text.
+Aho-Corasick constructs an automaton (Figure \ref{fig:ac_machine}), which is then ran on the text.
 States of this automaton are the nodes of a trie of all patterns strings.
-Additionally there are failure links for each state (Dotted edges in figure~\ref{fig:ac_machine}).
+Additionally there are failure links for each state (Dotted edges in Figure~\ref{fig:ac_machine})
 , which are followed until matching transition is found. From the root state all failing symbols
 have self-transitions.
 
@@ -116,6 +116,24 @@ Main disadvantage of Aho-Corasick algorithm is the $O(M)$ space needed to store 
 Our implementation uses $8M+O(P)$ bytes of memory.
 
 \vspace{5mm}
+
+%\begin{algorithm} [H]
+%\small
+%\caption{Running Aho-Corasick automaton}
+%\label{alg:ac_run}
+%
+%\begin{algorithmic}[1]
+%\Require{trie, fail, text}
+%\State $v \gets \text{root}$
+%\For {Each symbol $s$ in text}
+%\While {$\text{trie}(v,s)=\bot$}
+%    \State $v \gets \text{fail}(v)$ 
+%\EndWhile
+%\State $v \gets \text{trie}(v,s)$
+%\State Output all patterns matching state $v$.
+%\EndFor
+%\end{algorithmic}
+%\end{algorithm}
 
 \begin{algorithm} [H]
 \small
@@ -156,13 +174,12 @@ Our implementation uses $8M+O(P)$ bytes of memory.
 \label{fig:ac_machine}
 \centering
  \includegraphics[width=23cm]{aho_corasick.pdf}
-\caption{Aho-Corasick automaton with failure links and pattern list}
+\caption{Aho-Corasick automaton with failure links and the associated pattern list}
 \end{figure}
 
 
 \section{Experiments}
 
-The style supports all of the university's different faculties and special departments which have an official colour scheme.
 
 
 \section{Conclusions}
