@@ -84,20 +84,6 @@ def book_test(ids, textbook, patternbook,text_length, pattern_length, pattern_co
     os.system("rm pattern")
     os.system("rm text")
     return r
-ids = [0,1,2]
-def run_book():
-    for pc in range(5000,20000,3000):
-        for pl in range(4,20,3):
-            book_test(ids,"../musketeers.txt","../robinson.txt",50000,pl,pc)
-
-def run_random():
-    for pc in range(5000,20000,3000):
-        for pl in range(3,20,3):
-            print "patternlength: %d, patterncount %d" % (pl,pc)
-            random_test(ids,pl,1000000,pc,15)
-#run_random()
-#run_book()
-#book_test(ids,"../musketeers.txt","../robinson.txt",150000,4,14000)
-book_test_dist(ids,"../robinson.txt","../musketeers.txt",150000,[(x,2000) for x in xrange(4,15)])
-#book_test_dist(ids,"../musketeers.txt","../robinson.txt",150000,[(x,2000) for x in xrange(4,15)])
+#book_test(ids=ids,textbook="../musketeers.txt",patternbook="../robinson.txt",text_length=150000,pattern_length=4,pattern_count14000)
+book_test_dist(ids=ids,textbook="../robinson.txt",patternbook="../musketeers.txt",text_length=150000,pattern_distribution=[(x,2000) for x in xrange(4,15)])
 #random_test_dist(ids,[(x,10000) for x in xrange(4,15)], 550000,26)
