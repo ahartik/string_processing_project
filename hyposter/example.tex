@@ -58,11 +58,36 @@ Multiple pattern string matching is ...
 Aho --
 
 \section{Rabin-Karp}
-      Rabin-Karp uses hashing to find fixed length patterns in a text. The hashing function used is a rolling hash, meaning that the hash of $T[2\;..\;N+1]$ can be calculated from the hash of $T[1..N]$ in constant time. 
-     
-If the hash values of $T[i\;..\;N+i]$ and a pattern prefix of length N, the algorithm checks if the pattern occurs at text index $i$.
+      Rabin-Karp uses hashing to find fixed length patterns in a text. The hashing function used is a rolling hash, meaning that the hash of $T[2\;..\;N+1]$ can be calculated from the hash of $T[1..N]$ in constant time. Rabin-Karp in single pattern matching is shown in algorithm \ref{alg:rk_single}.
 
-    For $P$ patterns of combined length $m$  and a text of length $n$, the average running time of Rabin-Karp is $O(n+m)$ in space $O(P)$.
+\begin{algorithm} [H]
+\small
+\caption{Single pattern Rabin-Karp}
+\label{alg:rk_single}
+
+\begin{algorithmic}[1]
+\Require{pattern P of length M, text T of length N}
+
+\State $pattern\_hash \gets \text{hash(pattern)}$
+\State $text\_hash \gets \text{hash(T[1\;..\;M])}$
+\For {$i \gets M \to N$}
+    \If{$ i > M$}
+        \State  $text\_hash \gets \text{rolling\_hash(text\_hash,T[i-M],T[i])}$
+    \EndIf
+    \If{$pattern\_hash = text\_hash $}
+        \If{$T[i-M+1\;..\;i] = P$}
+            \State $\text{enqueue(matches,i-M+1)}$
+        \EndIf
+    \EndIf
+\EndFor
+\end{algorithmic}
+\end{algorithm}
+
+If the pattern length is fixed, multiple pattern Rabin-Karp can be modified from algorithm \ref{alg:rk_single} by storing all pattern hashes in a hash table and checking every text position against all patterns in the hash table at index $text\_hash$.
+
+If the pattern length is not fixed, it is possible to use fixed length Rabin-Karp separately for each pattern length. Another solution is to use the length $L$ of the shortest pattern, and calculate hashes only up to the $L$th character of each pattern. As this increases the number of false alarms, in practice it is often better to combine these methods and divide the patterns into several groups of similar lengths.
+
+For $P$ patterns of combined length $m$  and a text of length $n$, the average running time of Rabin-Karp is $O(n+m)$ in space $O(P)$.
 
 
 \section{Aho-Corasick}
@@ -81,6 +106,7 @@ matching state and from each pattern $s$ there is a link to the longest pattern 
 is a suffix of $s$.
 Using these links we can easily list all matching patterns for
 any state.
+\newcolumn
 
 \vspace{5mm}
 
@@ -127,7 +153,6 @@ any state.
 \end{figure}
 
 
-\newcolumn
 \section{Experiments}
 
 The style supports all of the university's different faculties and special departments which have an official colour scheme.
