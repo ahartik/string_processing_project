@@ -35,6 +35,8 @@
 \usepackage{lmodern}
 \usepackage{exscale}
 \usepackage{amsmath,amsthm, amssymb, latexsym}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
 
 \usepackage[orientation=portrait,size=a0,scale=1.4]{beamerposter}
 \usetheme[mat, threecolumn]{HYposter}
@@ -64,6 +66,66 @@ If the hash values of $T[i\;..\;N+i]$ and a pattern prefix of length N, the algo
 
 
 \section{Aho-Corasick}
+
+Aho-Corasick constructs an automaton (Figure \ref{fig:ac_machine}) which is then computed on the text.
+States of this automaton are the nodes of a trie of all patterns strings.
+Additionally there are failure links for each state (Dotted edges in figure~\ref{fig:ac_machine}).
+, which are followed until matching transition is found.
+
+%Running time of the algorithm is linear in the length of text. Each failure link goes towards the root, so in total we can't use more failure
+%links than we do transitions.
+
+The failure links are computed using algorithm~\ref{alg:ac_fail}.
+Pattern links (shown green in figure~\ref{fig:ac_machine}) are added to each
+matching state and from each pattern $s$ there is a link to the longest pattern which
+is a suffix of $s$.
+Using these links we can easily list all matching patterns for
+any state.
+
+\vspace{5mm}
+
+\begin{algorithm} [H]
+\small
+\caption{Algorithm for computing failure links}
+\label{alg:ac_fail}
+
+\begin{algorithmic}[1]
+\Require{Trie of patterns}
+\Ensure{Failure links for all nodes}
+\State $ \text{fail}(\text{root}) \gets \text{back}$
+\State $Q \gets Queue\{\text{root}\}$
+\While {$Q \neq \emptyset$}
+    \State $v \gets \text{dequeue}(Q) $
+    \For {$s \in \Sigma, \text{trie}(v,s)\neq \bot$}
+        \State $u \gets \text{trie}(v,s)$ 
+        \State $w \gets \text{fail}(v)$ 
+        \While {$\text{trie}(w,s)=\bot$}
+            \State $w \gets \text{fail}(w)$ 
+        \EndWhile
+        \State $ \text{fail}(u) \gets \text{trie}(w,s)$
+        \State $\text{enqueue}(Q,u)$
+    \EndFor
+\EndWhile
+\end{algorithmic}
+\end{algorithm}
+
+%    v = dequeue()
+%while (queue is not empty)
+%    for each transition (u, s):
+%        w = fail[v]
+%        while (trie[w][s]==null))
+%            w = fail[v]
+%        fail[u] = transition[w][s]
+%        enqueue(u)
+%
+
+\begin{figure}
+\label{fig:ac_machine}
+\centering
+ \includegraphics[width=23cm]{aho_corasick.pdf}
+\caption{Aho-Corasick automaton with failure links and pattern list}
+\end{figure}
+
 
 \newcolumn
 \section{Experiments}

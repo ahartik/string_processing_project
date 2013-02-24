@@ -11,7 +11,7 @@ ps2pdf poster.ps
 
 # Split poster into 16 A4s
 #tool/poster -mA4 -pA0 poster.ps > poster_A4.ps # UNCOMMENT
-ps2pdf poster_A4.ps
+# ps2pdf poster_A4.ps
 
 # Split poster into 8 A3s
 #./poster -mA3 -pA0 poster.ps > poster_A3.ps

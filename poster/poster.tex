@@ -13,10 +13,13 @@
 
 \documentclass[a4paper]{article} % This actually makes poster of size A4, scale up when printing. Used text font size is a bit small for A1 poster, preferably use \small in that case 
 
+
 % Misc. packages
 \usepackage[T1]{fontenc}
 \usepackage{url}
 \usepackage{amsfonts}
+\usepackage[font=small]{caption}
+\usepackage[english]{babel}
 \usepackage[absolute]{textpos}
 \usepackage{amssymb}
 \usepackage{amsmath} 
@@ -25,6 +28,12 @@
 % Graphics stuff
 \usepackage[usenames,dvipsnames]{color}
 \usepackage{graphicx}
+
+% algorithm stuff
+\usepackage{float}
+\usepackage{subfigure}
+\usepackage{algpseudocode}
+\usepackage{algorithm}
 
 
 % My favourite macros
@@ -162,6 +171,65 @@ decompression phase with respect to both space and time.
 \begin{textblock}{60}(0,32)
   {\sffamily\normalsize{\color{sciorange}AHO--CORASICK
       }}\vspace{1mm}\\ % Titles among the main text are made like this, not by using \section
+\footnotesize 
+
+Aho-Corasick matching algorithm constructs an automaton (Figure \ref{fig:ac_machine}) which is then computed on the text.
+Dotted links in figure \ref{fig:ac_machine} are followed until matching transition is found. From the $\bot$ state there is transition
+to starting state with all symbols.
+
+%Running time of the algorithm is linear in the length of text. Each failure link goes towards the root, so in total we can't use more failure
+%links than we do transitions.
+
+First we create a trie of all pattern strings. Then we traverse the trie in breadth first order.
+
+% Use includegraphics with width same as the current block width
+%\includegraphics[width=60mm]{zeros.png}
+
+% Captions are in sans-serif font, with smaller typeface than the main text.
+%\scriptsize\sffamily Complex zero points of polynomials with degree at most $8$ and coefficients in $\{ -1, 0, 1\}$.
+
+\vspace{5mm}
+
+\begin{algorithm} 
+\label{ac_fail}
+\caption{Algorithm for computing failure links}
+
+\begin{algorithmic}[1]
+\end{algorithmic}
+\end{algorithm}
+
+%\Require{Trie of patterns}
+%\Ensure{Failure links for all states}
+%\State  fail[root]$ \gets \bot$
+%\State enqueue(root)
+%\While {queue is not empty}
+%\State $v \gets $ dequeue()
+%\EndWhile
+
+%    v = dequeue()
+%while (queue is not empty)
+%    for each transition (u, s):
+%        w = fail[v]
+%        while (trie[w][s]==null))
+%            w = fail[v]
+%        fail[u] = transition[w][s]
+%        enqueue(u)
+%
+
+\begin{figure}
+\label{fig:ac_machine}
+\centering
+ \includegraphics[width=60mm]{aho_corasick.eps}
+\caption{Aho-Corasick automaton with failure links and pattern links}
+\end{figure}
+
+
+%During the construction of the automaton we also create pattern links, which link each pattern $s_i$ to
+%longest pattern 
+%For each accepting state there is a link to the longest matching pattern in patter
+%
+%In addition to the automaton Aho-Corasick algorithm creates linked 
+%For each matching state we have a link to 
 
 
 \end{textblock} 
@@ -180,133 +248,19 @@ If the hash values of $T[i\;..\;N+i]$ and a pattern prefix of length N, the algo
 
 % ----------------------- EXPERIMENTS ----------------------------
 
-\begin{textblock}{190}(0,97)
+\begin{textblock}{190}(0,120)
 \sffamily
 \Large{\color{sciorange}EXPERIMENTAL RESULTS}\small\\
 \rule[3mm]{190mm}{0.1pt}
 \end{textblock} 
 
 
-\begin{textblock}{60}(0,103) 
-  \footnotesize 
-  The basic inversion algorithm described above has linear time and
-  space complexity, but it still dominates the time and space
-  requirements during decompression in programs like bzip2.
-  \vspace{1mm}
-
-  It is slow because each memory access during the permutation 
-  traversal is essentially random causing many cache misses.
-  \vspace{1mm}
-
-  It needs a lot of space for the \rank\ array:
-  \begin{align*}
-    |\rank| &= n\log n \textrm{ bits} = 4n \textrm{ bytes}\\[-1mm]
-    |\textrm{text}| &= n\log\sigma \textrm{ bits} = n \textrm{ bytes}
-  \end{align*}
-  where $n={}$text length and $\sigma={}$alphabet size.
+\begin{textblock}{60}(0,125) 
 \end{textblock}
 
-\begin{textblock}{60}(0,152)
-  {\sffamily\normalsize{\color{sciorange}
-      REFERENCE POINT RANKS}}\vspace{1mm}\\
-  \footnotesize 
-  We reduce space by storing ranks relative to reference points,
-  which can be placed in two ways:\\
-
-  \begin{minipage}[t]{25mm}
-    \scriptsize\sffamily
-    \centering
-    Every $k$th position~\cite{ll2005}
-    \begin{center}
-      
-    \end{center}
-  \end{minipage}
-  \hfill
-  \begin{minipage}[t]{30mm}
-    \scriptsize\sffamily
-    \centering
-    Every $k$th occurrence [new]
-    \begin{center}
-      
-    \end{center}
-  \end{minipage}
-  \vspace{3mm}
-
-  \begin{minipage}{42mm}
-%\scriptsize\sffamily
-%\centering
-    \raggedright
-    A new improvement is to use variable length encoding, where
-    a frequent symbol uses less bits for symbol and more bits for rank.
-  \end{minipage}
-  \hfill
-  \begin{minipage}{17mm}
-    \begin{center}
-      
-    \end{center}
-  \end{minipage}
-  \vspace{1mm}
-
-  Finally, we can trade time for space by replacing \rank\ with
-  scanning from the nearest reference point~\cite{ll2005}.
-\end{textblock}
-
-\begin{textblock}{60}(65,104) 
-  {\sffamily\normalsize{\color{sciorange}
-      REPETITION SHORTCUTS}}\vspace{1mm}\\
-  \footnotesize 
-  Repetitions in the text manifest as \emph{pairs of parallel paths}
-  (PPP) in the inverse BWT permutation. We use this as follows.
-  \vspace{3mm}
-
-  \begin{minipage}[t]{29mm}
-    \scriptsize\sffamily
-    \centering
-    1. On the {\color{first}first pass},\\observe the PPP\\
-    (due to repeated ANA)
-    \begin{center}
-      
-    \end{center}
-  \end{minipage}
-  \hfill
-  \begin{minipage}[t]{29mm}
-    \scriptsize\sffamily
-    \centering
-    2. Replace the {\color{second}other path} by shortcut and
-    follow it\\on the second pass
-    \begin{center}
-      
-    \end{center}
-  \end{minipage}
-  \vspace{3mm}
-  
-  The shortcuts reduce the number of cache misses.  This is the
-  \emph{fastest} known algorithm.
+\begin{textblock}{60}(65,125) 
 \end{textblock} 
 
-\begin{textblock}{60}(65,173)
-  {\sffamily\normalsize{\color{sciorange}
-      WAVELET TREES}}\vspace{1mm}\\
-  \footnotesize 
-  \emph{Wavelet tree} is a text representation that can be both
-  compressed and preprocessed for rank que\-ries with little
-  additional space.  They are used with compressed text
-  indexes~\cite{nm2007} to answer \emph{general rank queries}:
-  \[
-  \rank_c(j)=\big|\{i \mid i<j \textrm{ and }
-  L[i]=c\}\big|.
-  \]
-  We need wavelet trees for \emph{special rank queries}:
-  \[
-  \rank(j)=\rank_{L[j]}(j).
-  \]
-  We use our own wavelet tree implementations optimized for special
-  rank queries.
-  \vspace{1mm}
-
-  We combine wavelet trees with reference point
-  ranks, obtaining the \emph{most space-efficient} algorithm.
-\end{textblock} 
 
 %\begin{textblock}{60}(130,165)
 %  {\sffamily\normalsize{\color{sciorange}CONCLUDING REMARKS}}\vspace{1mm}\\
