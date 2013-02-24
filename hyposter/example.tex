@@ -87,7 +87,7 @@ If the pattern length is fixed, multiple pattern Rabin-Karp can be modified from
 
 If the pattern length is not fixed, it is possible to use fixed length Rabin-Karp separately for each pattern length. Another solution is to use the length $L$ of the shortest pattern, and calculate hashes only up to the $L$th character of each pattern. As this increases the number of false alarms, in practice it is often better to combine these methods and divide the patterns into several groups of similar lengths.
 
-For $P$ patterns of combined length $m$  and a text of length $n$, the average running time of Rabin-Karp is $O(n+m)$ in space $O(P)$.
+For $P$ patterns of combined length $M$  and a text of length $N$, the average running time of Rabin-Karp is $O(N+M)$ in space $O(P)$.
 
 
 \section{Aho-Corasick}
@@ -110,10 +110,10 @@ Using these links we can easily list all matching patterns for
 any state.
 \newcolumn
 
-Construction algorithm has time and space complexity $O(M)$. Total time complexity is $O(N+M)$.
+Construction algorithm has time complexity $O(M)$. Total time complexity is $O(N+M)$.
 
-Main disadvantage of Aho-Corasick algorithm is its memory requirements.
-Our implementation uses $8M+O(P)$ bytes of space.
+Main disadvantage of Aho-Corasick algorithm is the $O(M)$ space needed to store the automaton.
+Our implementation uses $8M+O(P)$ bytes of memory.
 
 \vspace{5mm}
 
