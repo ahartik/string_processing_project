@@ -195,6 +195,7 @@ In figure \ref{fig:fixed_len} the pattern count is always 30000, but the pattern
 growing.
 In figures \ref{fig:var_len} and \ref{fig:text_len_var} pattern lengths are uniformly randomly selected from the interval $[10,200]$.
 
+\newcolumn
 \begin{figure}
 \centering
  \includegraphics[width=25cm]{fixed_len.pdf}
@@ -209,7 +210,6 @@ In figures \ref{fig:var_len} and \ref{fig:text_len_var} pattern lengths are unif
 Rabin-Karp is faster with longer patterns because the number of matches decreases.
 Aho-Corasick is slower with longer patterns due to automaton construction.
 \end{small}
-\newcolumn
 
 \begin{figure}
 {\centering
