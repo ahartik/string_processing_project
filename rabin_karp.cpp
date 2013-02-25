@@ -64,7 +64,7 @@ void rabin_karp_matcher<T>::match(
         // Calculate the minimum pattern length for this pattern group
         int hash_length=1<<20; 
         for(int i=0;i<patterns.size();i++) hash_length=min(hash_length,(int)orig_patterns[patterns[i]].size());
-        // cout<<"Hash Length: "<<hash_length<<endl;
+         cout<<"Hash Length: "<<hash_length<<endl;
 
         // Save hashes to the hash table
         for(int i=0;i<patterns.size();i++) {

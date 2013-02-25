@@ -34,5 +34,7 @@ public:
     virtual ~multiple_matcher()
     {
     }
+    mutable double pp_time;
+    mutable double match_time;
 };
 

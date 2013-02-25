@@ -7,6 +7,7 @@
 #include"aho_corasick.hpp"
 #include<queue>
 #include<cassert>
+#include"util.hpp"
 
 /**
  * Implementation of Aho-Corasick multiple pattern matching algorithm.
@@ -408,9 +409,13 @@ void aho_corasick_matcher::match(
         const std::vector<std::string>& patterns,
         match_vector& out) const
 {
+    double t = timef();
     ac_machine machine(patterns);
-    int v = machine.root;
 
+    pp_time = timef()-t;
+    t = timef();
+
+    int v = machine.root;
     for (size_t i = 0; i < text.size(); i++)
     {
         char c = text[i];
@@ -435,6 +440,7 @@ void aho_corasick_matcher::match(
             y = machine.next_match[y];
         }
     }
+    match_time = timef() - t;
 }
 void aho_corasick_matcher::print_dot(const std::vector<std::string>& patterns)
 {
