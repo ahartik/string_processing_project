@@ -8,7 +8,8 @@
 \usepackage{lmodern}
 \usepackage{exscale}
 \usepackage{amsmath,amsthm, amssymb, latexsym}
-%\usepackage{caption}
+\usepackage{caption}
+
 \usepackage{algorithm}
 \usepackage{xcolor}
 \usepackage{framed}
@@ -213,21 +214,21 @@ Aho-Corasick is slower with longer patterns due to automaton construction.
 \begin{figure}
 {\centering
  \includegraphics[width=25cm]{var_len.pdf}
-\caption{Matching time for variable length patterns}
-\label{fig:var_len}
-}
-\end{figure}
-
-\begin{small} 
-\centering
+\caption[Matching time for variable length patterns]
 {
+Matching time for variable length patterns.
+\newline
+\newline
 Rabin-Karp has very low overhead per pattern whereas 
 automaton construction dominates 
 Aho-Corasick running time.
 On the other hand once Aho-Corasick automaton is constructed,
 matching is fast even with large pattern sets.
 }
-\end{small}
+\label{fig:var_len}
+}
+\end{figure}
+
 
 
 \begin{figure}
@@ -235,29 +236,26 @@ matching is fast even with large pattern sets.
  \includegraphics[width=25cm]{text_len_fixed.pdf}
 \caption{
 Search time for fixed length patterns ($M = 200000$ and $P = 10000$)
+    \newline
+    \newline
+This is a good case for Rabin-Karp algorithm, as only one hash length is needed.
 }
 
 \label{fig:text_len_fixed}
 \end{figure}
-
-\begin{small}
-This is a good case for Rabin-Karp algorithm, as only one hash length is needed.
-\end{small}
 
 \begin{figure}
 \centering
 \includegraphics[width=25cm]{text_len.pdf}
 \caption{
 Search time for variable pattern lengths ($M = 100032$ and $P = 951$)
+\newline
+\newline
+Our Rabin-Karp implementation uses 4 different hash lengths with this pattern set.
+Aho-Corasick is faster when text length is larger than the total pattern length.
 }
 \label{fig:text_len_var}
 \end{figure}
-\begin{small}
-Our Rabin-Karp implementation uses 4 different hash lengths with this pattern set.
-\newline
-\newline
-Aho-Corasick is faster when text length is larger than the total pattern length.
-\end{small}
 
 %\section{Other algorithms}
 %There are many algorithms for this problem.
