@@ -35,6 +35,7 @@
 \usepackage{lmodern}
 \usepackage{exscale}
 \usepackage{amsmath,amsthm, amssymb, latexsym}
+\usepackage{caption}
 \usepackage{algorithm}
 \usepackage{algpseudocode}
 
@@ -64,7 +65,7 @@ Aho --
 \small
 \label{fig:hash}
 \begin{equation*}
-H_a = \text{hash(T[a\;..\;a+N)\;)} = \sum_{j=a}^{a+N-1}(T[j] \times B^{a+N-j-1})
+H_a = \text{hash(T[a\;..\;a+N]\;)} = \sum_{j=a}^{a+N-1}(T[j] \times B^{a+N-j-1})
 \end{equation*}
       \vspace{-4mm}
 \begin{equation*}
@@ -190,10 +191,69 @@ Our implementation uses $8M+O(P)$ bytes of memory.
 \end{figure}
 
 \section{Experiments}
-We ran experiments with various 
+In all our experiments we used the book The Three Musketeers by Alexandre Dumas as the
+searched text.
+Patterns are selected by randomly sampling a passage from the book.
+This ensures that each pattern will produce at least one match.
+
+In figures \ref{fig:fixed_len} and \ref{fig:var_len} the searched text is the whole book ($N=1242335$).
+In figure \ref{fig:fixed_len} the pattern count is always 30000, but the pattern length is
+growing.
+In figure \ref{fig:var_len} pattern lengths are uniformly randomly selected from the interval $[10,200]$.
+
+\newcolumn
+\begin{figure}
+\label{fig:fixed_len}
+\centering
+ \includegraphics[width=23cm]{fixed_len.pdf}
+\caption{Matching time for fixed length patterns with $P=30000$}
+\caption*{
+Rabin-Karp is faster with longer patterns because the number of matches decreases.
+Aho-Corasick is slower with longer patterns due to automaton construction.
+}
+\end{figure}
+\begin{figure}
+\label{fig:var_len}
+\centering
+ \includegraphics[width=23cm]{var_len.pdf}
+\caption{Matching time for variable length patterns}
+\caption*{
+Rabin-Karp has very low overhead per pattern, unlike Aho-Corasick.
+On the other hand once Aho-Corasick automaton is constructed,
+matching is fast with large pattern sets.
+}
+\end{figure}
+
+\begin{figure}
+\label{fig:text_len_fixed}
+\centering
+ \includegraphics[width=23cm]{text_len_fixed.pdf}
+\caption{
+Search time for fixed length patterns ($M = 200000$ and $P = 10000$)
+}
+\caption*{ }
+\end{figure}
+
+\begin{figure}
+\label{fig:text_len_var}
+\centering
+ \includegraphics[width=23cm]{text_len.pdf}
+\caption{
+Search time for variable pattern lengths ($M = 100032$ and $ P = 951 $)
+}
+\caption*{
+Rabin-Karp uses 4 different hash lengths. As its running time is closely linear to
+number of hash lengths used, we estimate that using 2 hash lengths would yield
+similar running times to Aho-Corasick for longer texts.
+\newline
+\newline
+For short texts the running time of Aho-Corasick is dominated by automaton construction.
+}
+\end{figure}
 
 \section{Conclusions}
 
+\section{Other algorithms}
 
 \section{Can I help?}
 There are still various issues with the style. There are some problems with math fonts which I haven't been able to solve to my satisfaction.
