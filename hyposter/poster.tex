@@ -8,6 +8,7 @@
 \usepackage{lmodern}
 \usepackage{exscale}
 \usepackage{amsmath,amsthm, amssymb, latexsym}
+\usepackage{mdframed}
 %\usepackage{caption}
 \usepackage{algorithm}
 \usepackage{algpseudocode}
@@ -77,31 +78,37 @@ If the pattern length is not fixed, it is possible to use fixed length Rabin-Kar
 For $P$ patterns of combined length $M$  and a text of length $N$, the average running time of Rabin-Karp is $O(N+M)$ in space $O(P)$.
 
 
+\newcolumn
 \section{Aho-Corasick}
 
 Aho-Corasick constructs an automaton (Figure \ref{fig:ac_machine}), which is then ran on the text.
 States of this automaton are the nodes of a trie of all patterns strings.
-Additionally there are failure links for each state (Dotted edges in Figure~\ref{fig:ac_machine})
-, which are followed until matching transition is found. From the root state all failing symbols
-have self-transitions.
+From the root state all failing symbols have self-transitions.
 
-\newcolumn
-%Running time of the algorithm is linear in the length of text. Each failure link goes towards the root, so in total we can't use more failure
-%links than we do transitions.
-%Additional ``back'' state is added to the automaton to make root node behave similarly to all other nodes. 
+To create transitions for each state and each symbol, the algorithm adds a failure link to each state
+(Dotted edges in Figure~\ref{fig:ac_machine}).
+Failure links are followed until matching transition is found.
+Failure links satisfy following property:
 
-The failure links are computed using algorithm~\ref{alg:ac_fail}.
-Pattern links (shown green in figure~\ref{fig:ac_machine}) are added to each
-matching state and from each pattern $s$ there is a link to the longest pattern which
+\begin{mdframed}
+If trie node $v$ corresponds to string $S$, then
+$fail(v)$ is the node of the longest suffix of $S$ in the trie.
+\end{mdframed}
+
+Failure links are created by traversing the trie in breadth first fashion
+while using the failure links of previous states to solve each new
+link in amortized constant time.
+%This is shown in algorithm~\ref{alg:ac_fail}
+
+To each accepting state a pattern link (shown green in Figure~\ref{fig:ac_machine})
+is added to the longest matching pattern.
+From each pattern $s$ there is a link to the longest pattern which
 is a suffix of $s$.
-Using these links we can easily list all matching patterns for
-any state.
+Using these links all matching patterns of a node are easily
+computed.
 
-Construction algorithm has time complexity $O(M)$. Total time complexity is $O(N+M)$.
-
-\vspace{5mm}
-
-The main disadvantage of Aho-Corasick algorithm is the $O(M)$ space needed to store the automaton.
+Total running time of Aho-Corasick algorithm is $O(N+M)$.
+Main disadvantage of Aho-Corasick algorithm is the $O(M)$ space needed to store the automaton.
 Our implementation uses $8M+O(P)$ bytes of memory.
 
 %\begin{algorithm} [H]
@@ -122,30 +129,29 @@ Our implementation uses $8M+O(P)$ bytes of memory.
 %\end{algorithmic}
 %\end{algorithm}
 
-\begin{algorithm} [H]
-\small
-\caption{Algorithm for computing failure links}
-\label{alg:ac_fail}
-
-\begin{algorithmic}[1]
-\Require{Trie of patterns}
-\Ensure{Failure links for all nodes}
-\State $ \text{fail}(\text{root}) \gets \text{fail}$
-\State $Q \gets Queue\{\text{root}\}$
-\While {$Q \neq \emptyset$}
-    \State $v \gets \text{dequeue}(Q) $
-    \For {$s \in \Sigma, \text{trie}(v,s)\neq \bot$}
-        \State $u \gets \text{trie}(v,s)$ 
-        \State $w \gets \text{fail}(v)$ 
-        \While {$\text{trie}(w,s)=\bot$}
-            \State $w \gets \text{fail}(w)$ 
-        \EndWhile
-        \State $ \text{fail}(u) \gets \text{trie}(w,s)$
-        \State $\text{enqueue}(Q,u)$
-    \EndFor
-\EndWhile
-\end{algorithmic}
-\end{algorithm}
+% \begin{algorithm} [H]
+% \small
+% \caption{Algorithm for computing failure links}
+% \label{alg:ac_fail}
+% \begin{algorithmic}[1]
+% \Require{Trie of patterns}
+% \Ensure{Failure links for all nodes}
+% \State $ \text{fail}(\text{root}) \gets \text{fail}$
+% \State $Q \gets Queue\{\text{root}\}$
+% \While {$Q \neq \emptyset$}
+%     \State $v \gets \text{dequeue}(Q) $
+%     \For {$s \in \Sigma, \text{trie}(v,s)\neq \bot$}
+%         \State $u \gets \text{trie}(v,s)$ 
+%         \State $w \gets \text{fail}(v)$ 
+%         \While {$\text{trie}(w,s)=\bot$}
+%             \State $w \gets \text{fail}(w)$ 
+%         \EndWhile
+%         \State $ \text{fail}(u) \gets \text{trie}(w,s)$
+%         \State $\text{enqueue}(Q,u)$
+%     \EndFor
+% \EndWhile
+% \end{algorithmic}
+% \end{algorithm}
 
 %    v = dequeue()
 %while (queue is not empty)
@@ -159,7 +165,7 @@ Our implementation uses $8M+O(P)$ bytes of memory.
 
 \begin{figure}
 \centering
- \includegraphics[width=23cm]{aho_corasick.pdf}
+ \includegraphics[width=25cm]{aho_corasick.pdf}
 \caption{Aho-Corasick automaton with failure links and the associated pattern list}
 \label{fig:ac_machine}
 \end{figure}
@@ -173,12 +179,12 @@ This ensures that each pattern will produce at least one match.
 In figures \ref{fig:fixed_len} and \ref{fig:var_len} the searched text is the whole book ($N=1242335$).
 In figure \ref{fig:fixed_len} the pattern count is always 30000, but the pattern length is
 growing.
-In figure \ref{fig:var_len} pattern lengths are uniformly randomly selected from the interval $[10,200]$.
+In figures \ref{fig:var_len} and \ref{fig:text_len_var} pattern lengths are uniformly randomly selected from the interval $[10,200]$.
 
 \newcolumn
 \begin{figure}
 \centering
- \includegraphics[width=23cm]{fixed_len.pdf}
+ \includegraphics[width=25cm]{fixed_len.pdf}
 \caption{Matching time for fixed length patterns with $P=30000$}
 \label{fig:fixed_len}
 %\caption*{
@@ -188,7 +194,7 @@ In figure \ref{fig:var_len} pattern lengths are uniformly randomly selected from
 \end{figure}
 \begin{figure}
 {\centering
- \includegraphics[width=23cm]{var_len.pdf}
+ \includegraphics[width=25cm]{var_len.pdf}
 \caption{Matching time for variable length patterns}
 \label{fig:var_len}
 }
@@ -201,32 +207,33 @@ matching is fast with large pattern sets.
 
 \begin{figure}
 \centering
- \includegraphics[width=23cm]{text_len_fixed.pdf}
+ \includegraphics[width=25cm]{text_len_fixed.pdf}
 \caption{
 Search time for fixed length patterns ($M = 200000$ and $P = 10000$)
 }
 \label{fig:text_len_fixed}
 \end{figure}
+This is the best case for Rabin-Karp algorithm, as only one hash length is needed.
 
 \begin{figure}
 \centering
- \includegraphics[width=23cm]{text_len.pdf}
+\includegraphics[width=25cm]{text_len.pdf}
 \caption{
-Search time for variable pattern lengths ($M = 100032$ and $ P = 951 $)
+Search time for variable pattern lengths ($M = 100032$ and $P = 951$)
 }
 \label{fig:text_len_var}
 \end{figure}
 \begin{small}
-Rabin-Karp uses 4 different hash lengths. As its running time is closely linear to
-number of hash lengths used, we estimate that using 2 hash lengths would yield
-similar running times to Aho-Corasick for longer texts.
+Rabin-Karp uses 4 different hash lengths.
 \newline
 \newline
 For short texts the running time of Aho-Corasick is dominated by automaton construction.
 \end{small}
+
 \section{Conclusions}
-
-
+\section{Other algorithms}
+There are many algorithms for this problem.
+Most of these algorithms however are limited to patterns of fixed length.
 
 \end{poster}
 \end{document}

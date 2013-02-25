@@ -25,13 +25,13 @@ set output 'text_len.pdf'
 set xlabel 'Text length'
 plot \
     "data/text_len.dat" using 1:2 title 'Aho-Corasick' with lines lw 2, \
-    "data/text_len.dat" using 1:4 title 'Rabin-Karp' with lines  lw 2, \
-    "data/text_len.dat" using 1:3 title 'Aho-Corasick without preprocessing' with lines lw 2; \
+    "data/text_len.dat" using 1:4 title 'Rabin-Karp' with lines  lw 2;
+#"data/text_len.dat" using 1:3 title 'Aho-Corasick without preprocessing' with lines lw 2; \
 
 set output 'text_len_fixed.pdf'
 set xlabel 'Text length'
 plot \
     "data/text_len_fixed.dat" using 1:2 title 'Aho-Corasick' with lines lw 2, \
-    "data/text_len_fixed.dat" using 1:4 title 'Rabin-Karp' with lines  lw 2, \
-    "data/text_len_fixed.dat" using 1:3 title 'Aho-Corasick without preprocessing' with lines lw 2; \
+    "data/text_len_fixed.dat" using 1:4 title 'Rabin-Karp' with lines  lw 2;
+#"data/text_len_fixed.dat" using 1:3 title 'Aho-Corasick without preprocessing' with lines lw 2; \
 
