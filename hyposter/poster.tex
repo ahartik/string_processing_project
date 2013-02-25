@@ -1,0 +1,232 @@
+\documentclass[final]{beamer}
+\mode<presentation>
+\usepackage{mathtools}
+\usepackage{comment}
+\usepackage[english]{babel}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{exscale}
+\usepackage{amsmath,amsthm, amssymb, latexsym}
+%\usepackage{caption}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{chngcntr}
+      % \counterwithout{figure}{chapter}
+            \counterwithout{figure}{section}
+\usepackage[orientation=portrait,size=a0,scale=1.4]{beamerposter}
+\usetheme[mat, threecolumn]{HYposter}
+% Set up the title and author info
+\titlestart{Aho-Corasick and Rabin-Karp}
+\titleend{in Multiple Pattern String Matching}
+\author{Aleksi Hartikainen and Jussi Kokkala}
+\leftcorner{}
+
+\begin{document}
+\begin{poster}
+
+\newcolumn
+
+%\section{\LaTeX~posters made easier}
+Multiple pattern string matching is ...
+
+Aho --
+
+\section{Rabin-Karp}
+      Rabin-Karp uses hashing to find fixed length patterns in a text. The hashing function used is a rolling hash, meaning that the hash of $T[2\;..\;N+1]$ can be calculated from the hash of $T[1..N]$ in constant time. Our implementation uses a hash function which interprets each substring $T[a\;..\;a+N)$ as an $N$ digit number in a base-$B$ numeral system:
+\small
+\begin{equation*}
+H_a = \text{hash}(T[a\;..\;a+N]\;) = \sum_{j=a}^{a+N-1}(T[j] \times B^{a+N-j-1})
+\end{equation*}
+      \vspace{-4mm}
+\begin{equation*}
+\begin{multlined}
+H_{a+1} = \text{rolling\_hash}(H_a, T[a], T[a+N])\\
+= H_a \times B -  T[a] \times B^{N}  + T[a+N]
+\end{multlined}
+\end{equation*}
+\normalsize
+\vspace{10mm}
+\begin{algorithm} [H]
+\small
+\caption{Single pattern Rabin-Karp}
+\label{alg:rk_single}
+
+\begin{algorithmic}[1]
+\Require{pattern P of length M, text T of length N}
+
+\State $pattern\_hash \gets \text{hash(pattern)}$
+\State $text\_hash \gets \text{hash(T[1\;..\;M])}$
+\For {$i \gets M \to N$}
+    \If{$ i > M$}
+        \State  $text\_hash \gets \text{rolling\_hash(text\_hash,T[i-M],T[i])}$
+    \EndIf
+    \If{$pattern\_hash = text\_hash $}
+        \If{$T[i-M+1\;..\;i] = P$}
+            \State $\text{enqueue(matches,i-M+1)}$
+        \EndIf
+    \EndIf
+\EndFor
+\end{algorithmic}
+\end{algorithm}
+
+If the pattern length is fixed, multiple pattern Rabin-Karp can be modified from algorithm (\ref{alg:rk_single}) by simply storing all pattern hashes in a hash table and checking every text position against each pattern in the hash table at index $text\_hash$.
+
+If the pattern length is not fixed, it is possible to use fixed length Rabin-Karp separately for each pattern length. Another solution is to use the length $L$ of the shortest pattern, and calculate hashes only up to the $L$th character of each pattern. As this increases the number of false alarms, our implementation combines these methods and divides the patterns into several groups of similar lengths.
+
+For $P$ patterns of combined length $M$  and a text of length $N$, the average running time of Rabin-Karp is $O(N+M)$ in space $O(P)$.
+
+
+\section{Aho-Corasick}
+
+Aho-Corasick constructs an automaton (Figure \ref{fig:ac_machine}), which is then ran on the text.
+States of this automaton are the nodes of a trie of all patterns strings.
+Additionally there are failure links for each state (Dotted edges in Figure~\ref{fig:ac_machine})
+, which are followed until matching transition is found. From the root state all failing symbols
+have self-transitions.
+
+\newcolumn
+%Running time of the algorithm is linear in the length of text. Each failure link goes towards the root, so in total we can't use more failure
+%links than we do transitions.
+%Additional ``back'' state is added to the automaton to make root node behave similarly to all other nodes. 
+
+The failure links are computed using algorithm~\ref{alg:ac_fail}.
+Pattern links (shown green in figure~\ref{fig:ac_machine}) are added to each
+matching state and from each pattern $s$ there is a link to the longest pattern which
+is a suffix of $s$.
+Using these links we can easily list all matching patterns for
+any state.
+
+Construction algorithm has time complexity $O(M)$. Total time complexity is $O(N+M)$.
+
+\vspace{5mm}
+
+The main disadvantage of Aho-Corasick algorithm is the $O(M)$ space needed to store the automaton.
+Our implementation uses $8M+O(P)$ bytes of memory.
+
+%\begin{algorithm} [H]
+%\small
+%\caption{Running Aho-Corasick automaton}
+%\label{alg:ac_run}
+%
+%\begin{algorithmic}[1]
+%\Require{trie, fail, text}
+%\State $v \gets \text{root}$
+%\For {Each symbol $s$ in text}
+%\While {$\text{trie}(v,s)=\bot$}
+%    \State $v \gets \text{fail}(v)$ 
+%\EndWhile
+%\State $v \gets \text{trie}(v,s)$
+%\State Output all patterns matching state $v$.
+%\EndFor
+%\end{algorithmic}
+%\end{algorithm}
+
+\begin{algorithm} [H]
+\small
+\caption{Algorithm for computing failure links}
+\label{alg:ac_fail}
+
+\begin{algorithmic}[1]
+\Require{Trie of patterns}
+\Ensure{Failure links for all nodes}
+\State $ \text{fail}(\text{root}) \gets \text{fail}$
+\State $Q \gets Queue\{\text{root}\}$
+\While {$Q \neq \emptyset$}
+    \State $v \gets \text{dequeue}(Q) $
+    \For {$s \in \Sigma, \text{trie}(v,s)\neq \bot$}
+        \State $u \gets \text{trie}(v,s)$ 
+        \State $w \gets \text{fail}(v)$ 
+        \While {$\text{trie}(w,s)=\bot$}
+            \State $w \gets \text{fail}(w)$ 
+        \EndWhile
+        \State $ \text{fail}(u) \gets \text{trie}(w,s)$
+        \State $\text{enqueue}(Q,u)$
+    \EndFor
+\EndWhile
+\end{algorithmic}
+\end{algorithm}
+
+%    v = dequeue()
+%while (queue is not empty)
+%    for each transition (u, s):
+%        w = fail[v]
+%        while (trie[w][s]==null))
+%            w = fail[v]
+%        fail[u] = transition[w][s]
+%        enqueue(u)
+%
+
+\begin{figure}
+\centering
+ \includegraphics[width=23cm]{aho_corasick.pdf}
+\caption{Aho-Corasick automaton with failure links and the associated pattern list}
+\label{fig:ac_machine}
+\end{figure}
+
+\section{Experiments}
+In all our experiments we used the book The Three Musketeers by Alexandre Dumas as the
+searched text.
+Patterns are selected by randomly sampling a passage from the book.
+This ensures that each pattern will produce at least one match.
+
+In figures \ref{fig:fixed_len} and \ref{fig:var_len} the searched text is the whole book ($N=1242335$).
+In figure \ref{fig:fixed_len} the pattern count is always 30000, but the pattern length is
+growing.
+In figure \ref{fig:var_len} pattern lengths are uniformly randomly selected from the interval $[10,200]$.
+
+\newcolumn
+\begin{figure}
+\centering
+ \includegraphics[width=23cm]{fixed_len.pdf}
+\caption{Matching time for fixed length patterns with $P=30000$}
+\label{fig:fixed_len}
+%\caption*{
+%Rabin-Karp is faster with longer patterns because the number of matches decreases.
+%Aho-Corasick is slower with longer patterns due to automaton construction.
+%}
+\end{figure}
+\begin{figure}
+{\centering
+ \includegraphics[width=23cm]{var_len.pdf}
+\caption{Matching time for variable length patterns}
+\label{fig:var_len}
+}
+\end{figure}
+\begin{small} 
+Rabin-Karp has very low overhead per pattern, unlike Aho-Corasick.
+On the other hand once Aho-Corasick automaton is constructed,
+matching is fast with large pattern sets.
+\end{small}
+
+\begin{figure}
+\centering
+ \includegraphics[width=23cm]{text_len_fixed.pdf}
+\caption{
+Search time for fixed length patterns ($M = 200000$ and $P = 10000$)
+}
+\label{fig:text_len_fixed}
+\end{figure}
+
+\begin{figure}
+\centering
+ \includegraphics[width=23cm]{text_len.pdf}
+\caption{
+Search time for variable pattern lengths ($M = 100032$ and $ P = 951 $)
+}
+\label{fig:text_len_var}
+\end{figure}
+\begin{small}
+Rabin-Karp uses 4 different hash lengths. As its running time is closely linear to
+number of hash lengths used, we estimate that using 2 hash lengths would yield
+similar running times to Aho-Corasick for longer texts.
+\newline
+\newline
+For short texts the running time of Aho-Corasick is dominated by automaton construction.
+\end{small}
+\section{Conclusions}
+
+
+
+\end{poster}
+\end{document}
