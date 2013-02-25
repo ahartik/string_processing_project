@@ -243,7 +243,7 @@
 \newcommand{\insertleftcorner}{}
 \newcommand{\leftcorner}[1]{\renewcommand{\insertleftcorner}{#1}}
 
-\newcommand{\inserttitlesize}{\veryHuge}
+\newcommand{\inserttitlesize}{\LARGE}
 \newcommand{\titlesize}[1]{\renewcommand{\inserttitlesize}{#1}}
 
 \title{\inserttitlestart~\inserttitleend}
@@ -312,11 +312,11 @@
 % block environment
 \setbeamercolor*{block body}{bg=white,fg=black}
 \setbeamercolor*{block title}{fg=TDK,bg=white}
-\setbeamerfont{block title}{size=\LARGE,series=\bf}
+\setbeamerfont{block title}{size=\normalsize,series=\bf}
 
 % example environment
 \setbeamercolor*{example title}{fg=TDK,bg=white}
-\setbeamerfont{example title}{size=\large,series=\bf}
+\setbeamerfont{example title}{size=\normalsize,series=\bf}
 
 \setbeamercolor{alerted text}{fg=TDK}
 
@@ -367,7 +367,7 @@
 	% TITLE
 	\begin{column}[b]{0.6\paperwidth}
 		\vskip5ex
-		\includegraphics[width=0.125\paperwidth]{\flame}\\
+		\includegraphics[width=0.105\paperwidth]{\flame}\\
 		\vskip3ex
 		\raggedright
 		\usebeamercolor{title coloured}{\color{fg}\inserttitlesize{\MakeUppercase{\inserttitlestart}}}\\
