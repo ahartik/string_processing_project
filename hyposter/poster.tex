@@ -76,13 +76,14 @@ If the pattern length is fixed, multiple pattern Rabin-Karp can be modified from
 If the pattern length is not fixed, it is possible to use fixed length Rabin-Karp separately for each pattern length. Another solution is to use the length $L$ of the shortest pattern, and calculate hashes only up to the $L$th character of each pattern. As this increases the number of false alarms, our implementation combines these methods and divides the patterns into several groups of similar lengths.
 
 
-\newcolumn
 \section{Aho-Corasick}
 
 Aho-Corasick constructs an automaton (Figure \ref{fig:ac_machine}), which is then ran on the text.
 States of this automaton are the nodes of a trie of all patterns strings.
 From the root state all failing symbols have self-transitions.
-
+\newcolumn
+\section{}
+\vspace{-19mm}
 To create transitions for each state and each symbol, the algorithm adds a failure link to each state
 (Dotted edges in Figure~\ref{fig:ac_machine}).
 Failure links are followed until matching transition is found.
@@ -179,7 +180,6 @@ In figure \ref{fig:fixed_len} the pattern count is always 30000, but the pattern
 growing.
 In figures \ref{fig:var_len} and \ref{fig:text_len_var} pattern lengths are uniformly randomly selected from the interval $[10,200]$.
 
-\newcolumn
 \begin{figure}
 \centering
  \includegraphics[width=25cm]{fixed_len.pdf}
@@ -190,6 +190,8 @@ In figures \ref{fig:var_len} and \ref{fig:text_len_var} pattern lengths are unif
 %Aho-Corasick is slower with longer patterns due to automaton construction.
 %}
 \end{figure}
+\newcolumn
+
 \begin{figure}
 {\centering
  \includegraphics[width=25cm]{var_len.pdf}
@@ -202,6 +204,7 @@ Rabin-Karp has very low overhead per pattern, unlike Aho-Corasick.
 On the other hand once Aho-Corasick automaton is constructed,
 matching is fast with large pattern sets.
 \end{small}
+
 
 \begin{figure}
 \centering
@@ -228,10 +231,9 @@ Rabin-Karp uses 4 different hash lengths.
 For short texts the running time of Aho-Corasick is dominated by automaton construction.
 \end{small}
 
-\section{Conclusions}
-\section{Other algorithms}
-There are many algorithms for this problem.
-Most of these algorithms however are limited to patterns of fixed length.
+%\section{Other algorithms}
+%There are many algorithms for this problem.
+%Most of these algorithms however are limited to patterns of fixed length.
 
 \end{poster}
 \end{document}
