@@ -11,10 +11,6 @@ using namespace std;
 vector<string> patterns;
 string text;
 
-static double timef() {
-    return clock() / (double)CLOCKS_PER_SEC;
-}
-
 void matcher_time(const multiple_matcher* m)
 {
     cout << "=== "<<m->name()<<" ===\n";
