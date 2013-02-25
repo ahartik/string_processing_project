@@ -8,7 +8,7 @@
 \usepackage{lmodern}
 \usepackage{exscale}
 \usepackage{amsmath,amsthm, amssymb, latexsym}
-\usepackage{mdframed}
+%\usepackage{mdframed}
 %\usepackage{caption}
 \usepackage{algorithm}
 \usepackage{algpseudocode}
@@ -28,10 +28,10 @@
 
 \newcolumn
 
-%\section{\LaTeX~posters made easier}
-Multiple pattern string matching is 
+\section{Abstract}
+Multiple pattern string matching is a common real world problem with applications to virus detection, DNA matching, and plagiarism detection. The task is to find every matching position of each of the given $P$ patterns of combined total length $M$ in a text of length $N$.
 
-Aho --
+Rabin-Karp is a single pattern matching algorithm which can be easily adapted to multiple pattern problem. Aho-Corasick constructs a finite state machine from the pattern set. We implemented both of these algorithms and compared their performance in matching English text patterns.
 
 \section{Rabin-Karp}
       Rabin-Karp uses hashing to find fixed length patterns in a text. The hashing function used is a rolling hash, meaning that the hash of $T[2\;..\;N+1]$ can be calculated from the hash of $T[1..N]$ in constant time. Our implementation uses a hash function which interprets each substring $T[a\;..\;a+N)$ as an $N$ digit number in a base-$B$ numeral system:
@@ -75,8 +75,6 @@ If the pattern length is fixed, multiple pattern Rabin-Karp can be modified from
 
 If the pattern length is not fixed, it is possible to use fixed length Rabin-Karp separately for each pattern length. Another solution is to use the length $L$ of the shortest pattern, and calculate hashes only up to the $L$th character of each pattern. As this increases the number of false alarms, our implementation combines these methods and divides the patterns into several groups of similar lengths.
 
-For $P$ patterns of combined length $M$  and a text of length $N$, the average running time of Rabin-Karp is $O(N+M)$ in space $O(P)$.
-
 
 \newcolumn
 \section{Aho-Corasick}
@@ -90,10 +88,10 @@ To create transitions for each state and each symbol, the algorithm adds a failu
 Failure links are followed until matching transition is found.
 Failure links satisfy following property:
 
-\begin{mdframed}
+%\begin{mdframed}
 If trie node $v$ corresponds to string $S$, then
 $fail(v)$ is the node of the longest suffix of $S$ in the trie.
-\end{mdframed}
+%\end{mdframed}
 
 Failure links are created by traversing the trie in breadth first fashion
 while using the failure links of previous states to solve each new
